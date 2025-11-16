@@ -99,7 +99,11 @@ void stencil3d_7pt(const float* __restrict__ in,
             else
                 tile[tz + HALO + 1][ty + HALO][tx + HALO] = 0.0f;
         }
+    } else {
+        // out of bounds threads set their tile values to 0
+        tile[tz + HALO][ty + HALO][tx + HALO] = 0.0f;
     }
+
     __syncthreads();
 
     if (gx >= NX || gy >= NY || gz >= NZ) return;
