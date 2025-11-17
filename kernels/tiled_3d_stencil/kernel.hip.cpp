@@ -20,6 +20,11 @@ void stencil3d_7pt(const float* __restrict__ in,
     int ty = threadIdx.y;
     int tz = threadIdx.z;
 
+    // Offset indicies within the tile
+    int lx = threadIdx.x + HALO;
+    int ly = threadIdx.y + HALO;
+    int lz = threadIdx.z + HALO;
+
     // Block dimensions
     int bx = blockDim.x;
     int by = blockDim.y;
@@ -37,7 +42,7 @@ void stencil3d_7pt(const float* __restrict__ in,
 
     if (in_bounds) {
         // Load central region
-        tile[tz + HALO][ty + HALO][tx + HALO] = in[(gz * NY + gy) * NX + gx];
+        tile[lz][ly][lx] = in[(gz * NY + gy) * NX + gx];
 
         // need to load halo regions as well
 
@@ -45,63 +50,63 @@ void stencil3d_7pt(const float* __restrict__ in,
         if (tx == 0) {
             // if we are not on the global left boundary we can load from global memory
             if (gx > 0)
-                tile[tz + HALO][ty + HALO][tx] = in[(gz * NY + gy) * NX + gx - 1];
+                tile[lz][ly][lx -1] = in[(gz * NY + gy) * NX + gx - 1];
             // else we are on the global left boundary so we would exceed bounds, set to 0
             else
-                tile[tz + HALO][ty + HALO][tx] = 0.0f;
+                tile[lz][ly][lx -1] = 0.0f;
         }
 
         // if we are on the right x-boundary of the block then we need to load the right halo
         if (tx == bx - 1) {
             // if we are not on the global right boundary we can load from global memory
             if (gx < NX - 1)
-                tile[tz + HALO][ty + HALO][tx + HALO + 1] = in[(gz * NY + gy) * NX + gx + 1];
+                tile[lz][ly][lx + 1] = in[(gz * NY + gy) * NX + gx + 1];
             // else we are on the global right boundary so we would exceed bounds, set to 0
             else
-                tile[tz + HALO][ty + HALO][tx + HALO + 1] = 0.0f;
+                tile[lz][ly][lx + 1] = 0.0f;
         }
 
         // if we are on the bottom y-boundary of the block then we need to load the bottom halo
         if (ty == 0) {
             // if we are not on the global bottom boundary we can load from global memory
             if (gy > 0)
-                tile[tz + HALO][ty][tx + HALO] = in[(gz * NY + gy - 1) * NX + gx];
+                tile[lz][ly - 1][lx] = in[(gz * NY + gy - 1) * NX + gx];
             // else we are on the global left boundary so we would exceed bounds, set to 0
             else
-                tile[tz + HALO][ty][tx + HALO] = 0.0f;
+                tile[lz][ly - 1][lx] = 0.0f;
         }
 
         // if we are on the top y-boundary of the block then we need to load the top halo
         if (ty == by - 1) {
             // if we are not on the global top boundary we can load from global memory
             if (gy < NY - 1)
-                tile[tz + HALO][ty + HALO + 1][tx + HALO] = in[(gz * NY + gy + 1) * NX + gx];
+                tile[lz][ly + 1][lx] = in[(gz * NY + gy + 1) * NX + gx];
             // else we are on the global left boundary so we would exceed bounds, set to 0
             else
-                tile[tz + HALO][ty + HALO + 1][tx + HALO] = 0.0f;
+                tile[lz][ly + 1][lx] = 0.0f;
         }
         
         // if we are on the back z-boundary of the block then we need to load the back halo
         if (tz == 0) {
             // if we are not on the global back boundary we can load from global memory
             if (gz > 0)
-                tile[tz][ty + HALO][tx + HALO] = in[((gz - 1) * NY + gy) * NX + gx];
+                tile[lz - 1][ly][lx] = in[((gz - 1) * NY + gy) * NX + gx];
             // else we are on the global back boundary so we would exceed bounds, set to 0
             else
-                tile[tz][ty + HALO][tx + HALO] = 0.0f;
+                tile[lz - 1][ly][lx] = 0.0f;
         }
         
         // if we are on the front z-boundary of the block then we need to load the front halo
         if (tz == bz - 1) {
             // if we are not on the global front boundary we can load from global memory
             if (gz < NZ - 1)
-                tile[tz + HALO + 1][ty + HALO][tx + HALO] = in[((gz + 1) * NY + gy) * NX + gx];
+                tile[lz + 1][ly][lx] = in[((gz + 1) * NY + gy) * NX + gx];
             else
-                tile[tz + HALO + 1][ty + HALO][tx + HALO] = 0.0f;
+                tile[lz + 1][ly][lx] = 0.0f;
         }
     } else {
         // out of bounds threads set their tile values to 0
-        tile[tz + HALO][ty + HALO][tx + HALO] = 0.0f;
+        tile[lz][ly][lx] = 0.0f;
     }
 
     __syncthreads();
@@ -109,15 +114,14 @@ void stencil3d_7pt(const float* __restrict__ in,
     if (gx >= NX || gy >= NY || gz >= NZ) return;
 
     out[(gz * NY + gy) * NX + gx] = 
-        0.5f * tile[tz + HALO][ty + HALO][tx + HALO] +
-        0.1f * (tile[tz + HALO][ty + HALO][tx + HALO - 1] +
-                tile[tz + HALO][ty + HALO][tx + HALO + 1] +
-                tile[tz + HALO][ty + HALO - 1][tx + HALO] +
-                tile[tz + HALO][ty + HALO + 1][tx + HALO] +
-                tile[tz + HALO - 1][ty + HALO][tx + HALO] +
-                tile[tz + HALO + 1][ty + HALO][tx + HALO]);
+        0.5f * tile[lz][ly][lx] +
+        0.1f * (tile[lz][ly][lx - 1] +
+                tile[lz][ly][lx + 1] +
+                tile[lz][ly - 1][lx] +
+                tile[lz][ly + 1][lx] +
+                tile[lz - 1][ly][lx] +
+                tile[lz + 1][ly][lx]);
 }
-
 
 int main() {
     const int NX = 128;
@@ -125,7 +129,7 @@ int main() {
     const int NZ = 128;
 
     const int N = NZ * NY * NX;
-    size_t size = N * sizeof(int);
+    size_t size = N * sizeof(float);
 
     float *in_d, *out_d;
 
