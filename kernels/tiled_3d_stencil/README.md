@@ -19,11 +19,11 @@ Speaking of, this was my first time creating tiles and using LDS. I now understa
 I understand the general pattern of writing a stencil:
 
 - launch blocks of some reasonable thread count, e.g. 512
-- create a tile in LDS whose dimensions are the same as the block dimensions, increased by HALO*2 in each dimension (I do realize that HALO*2 may not be applicable to other stencils)
+- create a tile in LDS whose dimensions are the same as the block dimensions, increased by HALO\*2 in each dimension (I do realize that HALO\*2 may not be applicable to other stencils)
 - every thread should load its central cell (itself) into LDS
 - threads on the boundaries of blocks should load halos
  
-The small block size ensures that each block requests a relatively small and constant size from the LDS, e.g. with HALO=2, 10*10*10 = 1000 bytes of LDS, and LDS on latest gen AMD hardware is 64KB.
+The small block size ensures that each block requests a relatively small and constant size from the LDS, e.g. with HALO=2, 10\*10\*10 = 1000 bytes of LDS, and LDS on latest gen AMD hardware is 64KB.
 
 
 
