@@ -38,42 +38,47 @@ void stencil3d_7pt(const float* __restrict__ in,
     // LDS tile with halo
     __shared__ float tile[TILE_Z][TILE_Y][TILE_X];
 
+    /*
+        this function is called by threads at the boundary of their respective
+        blocks to load the respective halo (depending on which boundary we
+        are at: x, y, z)
+    */
     auto load_halo = [&] __device__ (int offset, char dim) {
 
         float val = 0.0f;
 
-        // Compute neighbor global coordinate in chosen dimension
-        int ng = 0;
-        if (dim == 'X')      ng = gx + offset;
-        else if (dim == 'Y') ng = gy + offset;
-        else                 ng = gz + offset;
+        // which index from the input should this halo load from?
+        int target_idx = 0;
+        if (dim == 'X')      target_idx = gx + offset;
+        else if (dim == 'Y') target_idx = gy + offset;
+        else                 target_idx = gz + offset;
 
         bool valid = false;
         int idx = -1;
 
-        // Compute correct global memory index
         if (dim == 'X') {
-            if (ng >= 0 && ng < NX) {
-                idx = (gz * NY + gy) * NX + ng;
+            if (target_idx >= 0 && target_idx < NX) {
+                idx = (gz * NY + gy) * NX + target_idx;
                 valid = true;
             }
         }
         else if (dim == 'Y') {
-            if (ng >= 0 && ng < NY) {
-                idx = (gz * NY + ng) * NX + gx;
+            if (target_idx >= 0 && target_idx < NY) {
+                idx = (gz * NY + target_idx) * NX + gx;
                 valid = true;
             }
         }
         else { // Z
-            if (ng >= 0 && ng < NZ) {
-                idx = (ng * NY + gy) * NX + gx;
+            if (target_idx >= 0 && target_idx < NZ) {
+                idx = (target_idx * NY + gy) * NX + gx;
                 valid = true;
             }
         }
 
+        // if the current thread is outside the input domain fallback to 0.0f
         val = valid ? in[idx] : 0.0f;
 
-        // Store into LDS tile
+        // store
         if (dim == 'X')
             tile[lz][ly][lx + offset] = val;
         else if (dim == 'Y')
@@ -84,8 +89,10 @@ void stencil3d_7pt(const float* __restrict__ in,
 
     bool in_bounds = (gx < NX) && (gy < NY) && (gz < NZ);
 
+    // every thread load its central neighbor into LDS
     tile[lz][ly][lx] = in_bounds ? in[(gz * NY + gy) * NX + gx] : 0.0f;
 
+    // if we are at some boundary, load respective halo
     if (tx == 0) {
         for (int i = 1; i <= HALO; i++)
             load_halo(-i, 'X');
@@ -118,6 +125,7 @@ void stencil3d_7pt(const float* __restrict__ in,
 
     __syncthreads();
 
+    // OOB threads should only perform loads, not compute
     if (!in_bounds) return;
 
     out[(gz * NY + gy) * NX + gx] = 
