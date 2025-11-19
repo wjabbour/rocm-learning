@@ -84,53 +84,36 @@ void stencil3d_7pt(const float* __restrict__ in,
 
     bool in_bounds = (gx < NX) && (gy < NY) && (gz < NZ);
 
-    if (in_bounds) {
-        tile[lz][ly][lx] = in[(gz * NY + gy) * NX + gx];
+    tile[lz][ly][lx] = in_bounds ? in[(gz * NY + gy) * NX + gx] : 0.0f;
 
-        if (tx == 0) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(-i, 'X');
-        }
+    if (tx == 0) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(-i, 'X');
+    }
 
-        /*
-        
-            the issue i have is with block overhang..
+    if (tx == blockDim.x - 1) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(+i, 'X');
+    }
 
-            to support halo greater than 1 i need to address the fact that
+    if (ty == 0) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(-i, 'Y');
+    }
 
-            the tx may not be equal to bx - 1 but tx + HALO > NX
+    if (ty == blockDim.y - 1) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(+i, 'Y');
+    }
+    
+    if (tz == 0) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(-i, 'Z');
+    }
 
-            bx = 8, tx = 6 halo = 2
-
-        */
-        if (tx == blockDim.x - 1) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(+i, 'X');
-        }
-
-        if (ty == 0) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(-i, 'Y');
-        }
-
-        if (ty == blockDim.y - 1) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(+i, 'Y');
-        }
-        
-        if (tz == 0) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(-i, 'Z');
-        }
-
-        if (tz == blockDim.z - 1) {
-            for (int i = 1; i <= HALO; i++)
-                load_halo(+i, 'Z');
-        }
-
-    } else {
-        // out of bounds threads set their tile values to 0
-        tile[lz][ly][lx] = 0.0f;
+    if (tz == blockDim.z - 1) {
+        for (int i = 1; i <= HALO; i++)
+            load_halo(+i, 'Z');
     }
 
     __syncthreads();
