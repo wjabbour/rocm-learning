@@ -38,66 +38,96 @@ void stencil3d_7pt(const float* __restrict__ in,
     // LDS tile with halo
     __shared__ float tile[TILE_Z][TILE_Y][TILE_X];
 
+    auto load_halo = [&] __device__ (int offset, char dim) {
+
+        float val = 0.0f;
+
+        // Compute neighbor global coordinate in chosen dimension
+        int ng = 0;
+        if (dim == 'X')      ng = gx + offset;
+        else if (dim == 'Y') ng = gy + offset;
+        else                 ng = gz + offset;
+
+        bool valid = false;
+        int idx = -1;
+
+        // Compute correct global memory index
+        if (dim == 'X') {
+            if (ng >= 0 && ng < NX) {
+                idx = (gz * NY + gy) * NX + ng;
+                valid = true;
+            }
+        }
+        else if (dim == 'Y') {
+            if (ng >= 0 && ng < NY) {
+                idx = (gz * NY + ng) * NX + gx;
+                valid = true;
+            }
+        }
+        else { // Z
+            if (ng >= 0 && ng < NZ) {
+                idx = (ng * NY + gy) * NX + gx;
+                valid = true;
+            }
+        }
+
+        val = valid ? in[idx] : 0.0f;
+
+        // Store into LDS tile
+        if (dim == 'X')
+            tile[lz][ly][lx + offset] = val;
+        else if (dim == 'Y')
+            tile[lz][ly + offset][lx] = val;
+        else
+            tile[lz + offset][ly][lx] = val;
+    };
+
     bool in_bounds = (gx < NX) && (gy < NY) && (gz < NZ);
 
     if (in_bounds) {
-        // Load central region
         tile[lz][ly][lx] = in[(gz * NY + gy) * NX + gx];
 
-        // need to load halo regions as well
-
-        // if we are on the left x-boundary of the block then we need to load the left halo
         if (tx == 0) {
-            // if we are not on the global left boundary we can load from global memory
-            tile[lz][ly][lx - 1] = (gx > 0)
-                ? in[(gz * NY + gy) * NX + gx - 1]
-                // else we are on the global left boundary so we would exceed bounds, set to 0
-                : 0.0f;
+            for (int i = 1; i <= HALO; i++)
+                load_halo(-i, 'X');
         }
 
-        // if we are on the right x-boundary of the block then we need to load the right halo
-        if (tx == bx - 1) {
-            // if we are not on the global right boundary we can load from global memory
-            tile[lz][ly][lx + 1] = (gx < NX - 1)
-                ? in[(gz * NY + gy) * NX + gx + 1]
-                // else we are on the global right boundary so we would exceed bounds, set to 0
-                : 0.0f;
+        /*
+        
+            the issue i have is with block overhang..
+
+            to support halo greater than 1 i need to address the fact that
+
+            the tx may not be equal to bx - 1 but tx + HALO > NX
+
+            bx = 8, tx = 6 halo = 2
+
+        */
+        if (tx == blockDim.x - 1) {
+            for (int i = 1; i <= HALO; i++)
+                load_halo(+i, 'X');
         }
 
-        // if we are on the bottom y-boundary of the block then we need to load the bottom halo
         if (ty == 0) {
-            // if we are not on the global bottom boundary we can load from global memory
-            tile[lz][ly - 1][lx] = (gy > 0)
-                ? in[(gz * NY + gy - 1) * NX + gx]
-                // else we are on the global left boundary so we would exceed bounds, set to 0
-                : 0.0f;
+            for (int i = 1; i <= HALO; i++)
+                load_halo(-i, 'Y');
         }
 
-        // if we are on the top y-boundary of the block then we need to load the top halo
-        if (ty == by - 1) {
-            // if we are not on the global top boundary we can load from global memory
-            tile[lz][ly + 1][lx] = (gy < NY - 1)
-                ? in[(gz * NY + gy + 1) * NX + gx]
-                // else we are on the global left boundary so we would exceed bounds, set to 0
-                : 0.0f;
+        if (ty == blockDim.y - 1) {
+            for (int i = 1; i <= HALO; i++)
+                load_halo(+i, 'Y');
         }
         
-        // if we are on the back z-boundary of the block then we need to load the back halo
         if (tz == 0) {
-            // if we are not on the global back boundary we can load from global memory
-            tile[lz - 1][ly][lx] = (gz > 0)
-                ? in[((gz - 1) * NY + gy) * NX + gx]
-                // else we are on the global back boundary so we would exceed bounds, set to 0
-                : 0.0f;
+            for (int i = 1; i <= HALO; i++)
+                load_halo(-i, 'Z');
         }
-        
-        // if we are on the front z-boundary of the block then we need to load the front halo
-        if (tz == bz - 1) {
-            // if we are not on the global front boundary we can load from global memory
-            tile[lz + 1][ly][lx] = (gz < NZ - 1)
-                ? in[((gz + 1) * NY + gy) * NX + gx]
-                : 0.0f;
+
+        if (tz == blockDim.z - 1) {
+            for (int i = 1; i <= HALO; i++)
+                load_halo(+i, 'Z');
         }
+
     } else {
         // out of bounds threads set their tile values to 0
         tile[lz][ly][lx] = 0.0f;
@@ -105,7 +135,7 @@ void stencil3d_7pt(const float* __restrict__ in,
 
     __syncthreads();
 
-    if (gx >= NX || gy >= NY || gz >= NZ) return;
+    if (!in_bounds) return;
 
     out[(gz * NY + gy) * NX + gx] = 
         0.5f * tile[lz][ly][lx] +
