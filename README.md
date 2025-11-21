@@ -61,4 +61,4 @@ rocprof, occupancy analysis, register pressure, DMA behavior, and memory bandwid
 # Contact
 
 doubleujabbour@gmail.com <br>
-[LinkedIn](linkedin.com/in/doubleujabbour)
+[LinkedIn](https://linkedin.com/in/doubleujabbour)
