@@ -47,6 +47,9 @@ int main() {
     hipFree(A_h);
     hipFree(B_h);
     hipFree(C_h);
+    free(A_d);
+    free(B_d);
+    free(C_d);
 
     return 0;
 }
