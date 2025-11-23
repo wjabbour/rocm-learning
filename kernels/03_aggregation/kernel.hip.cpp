@@ -2,22 +2,23 @@
 #include <iostream>
 
 __global__ void partial_reduction(int* in, int* out, int N) {
-    float sum 0.0f;
+    int sum  = 0;
+    std::cout << "hey" << "\n";
 
     int tid = gridDim.x * blockDim.x + threadIdx.x;
 
-    for (let i = tid; i < N; i += gridDim.x * blockDim.x) {
+    for (int i = tid; i < N; i += gridDim.x * blockDim.x) {
         sum += in[i];
     }
 
-    out[tid] = sum;
+    out[tid] = 1;
 }
 
 int main() {
-    const int N = 10
+    const int N = 10;
     size_t size = N * sizeof(int);
 
-    int blockSize = 2;
+    int blockSize = 10;
     int blockCount = (N + blockSize - 1) / blockSize;
 
     int *A_d, *B_d;
@@ -30,13 +31,14 @@ int main() {
 
     for (int i = 0; i < N; i++) {
         A_h[i] = i + 1;
+        B_h[i] = 0;
     }
 
     hipMemcpy(A_d, A_h, size, hipMemcpyHostToDevice);
     hipMemcpy(B_d, B_h, size, hipMemcpyHostToDevice);
 
     hipLaunchKernelGGL(
-        add_kernel,
+        partial_reduction,
         dim3(blockCount),
         dim3(blockSize), 
         0,
