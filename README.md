@@ -2,7 +2,7 @@
 
 Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node.js and React. Over the last year I’ve become deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
-This repository is my space to learn in public as I transition from front-end/back-end development into GPU kernel engineering and inference systems work. Each directory contains:
+This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work. Each directory contains:
 
 - a kernel or systems-level experiment,
 
