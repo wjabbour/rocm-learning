@@ -1,0 +1,1 @@
+HBM = High Bandwidth Memory

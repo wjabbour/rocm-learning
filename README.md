@@ -2,15 +2,13 @@
 
 Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node.js and React. Over the last year I’ve become deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
-This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work. Each directory contains:
+This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
-- a kernel or systems-level experiment,
+There are three directories:
 
-- a short write-up explaining the purpose of the exercise,
-
-- what I learned,
-
-- and how it relates to real-world inference workloads.
+- `kernels` - I explore different kernels and include a write up of what I learned and how it relates to inference.
+- `papers` - I summarize and discuss different papers.
+- `topics` - I dive deep into some specific topic.
 
 My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU software stack, with a focus on high-performance inference.
 
