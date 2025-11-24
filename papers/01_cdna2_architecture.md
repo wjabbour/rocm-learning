@@ -16,7 +16,7 @@ Next, the paper goes on to describe the architectural improvements AMD has made 
 
 Next, there is an architectural review of a Graphics Compute Die (GCD) which I understand to be a misnomer, given that CDNA cards contain no graphics processing capability and are designed for compute only.
 
-The GCD contains the compute, memory and cache controllers, and Infinity Facbric/HBM connections necessary to build exascale computing systems. The GCD is comprised of four compute engines, each controlling their own set of compute units which contain the SIMD pipelines which are responsible for executing instructions and performing computation.
+The GCD contains the compute, memory and cache controllers, and Infinity Fabric/HBM connections necessary to build exascale computing systems. The GCD is comprised of four compute engines, each controlling their own set of compute units which contain the SIMD pipelines which are responsible for executing instructions and performing computation.
 Each compute unit sits physically near a large, shared L2 cache as well as near memory controllers for accessing global memory.
 
 An MI250 and MI250X is an OAM form factor device with two GCDs on the package. The MI210 is a PCIe form factor device with a single GCD.
