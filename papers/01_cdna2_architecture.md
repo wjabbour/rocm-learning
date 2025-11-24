@@ -1,3 +1,5 @@
+![WIP](https://img.shields.io/badge/status-WIP-yellow)
+
 # Paper
 
 [link](https://www.amd.com/content/dam/amd/en/documents/instinct-business-docs/white-papers/amd-cdna2-white-paper.pdf)
@@ -36,3 +38,5 @@ Next, the paper talks about how the memory hierarchy is scaled.
 The compute-side of the dies have improved generationally, and what becomes increasingly important is ensuring that the system can feed these computational elements via extremely fast, wide memory buses. The memory controlles which sit on the GCD are built to access large portions of global memory and load into L2 cache to amplify CU bandwidth. This relates to inference because training models and various other workloads can be improved if they are bottle necked by data, requiring large datasets to be held in memory.
 
 There are multiple memory controllers on the GCD, each memory controller has its own physical slice of L2 cache. In this way, memory is distributed across the die. All resources on the GCD (compute engines, compute units, matrix cores, DMA engines) can access any slice of L2 cache. The L2 is 8MB and 16-way associative. The bandwidth for each L2 slice has doubled to 128 byes per cycle, increasing the throughput of L2->CU to 6.96 TB/s in aggregate per die. Lastly, the scheduling of reads and writes to this distributed cache has been improved so that various types of workloads can benefit.
+
+The synchronization capabilites of L2 cache have dramatically increased, allowing atomic FP64 operations like addition, min, max.
