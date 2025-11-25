@@ -14,10 +14,10 @@ __global__ void partial_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    const int N = 10;
+    const int N = 1 << 5;
     size_t size = N * sizeof(int);
 
-    int blockSize = 10;
+    int blockSize = 64;
     int blockCount = (N + blockSize - 1) / blockSize;
 
     int *A_d, *B_d;
