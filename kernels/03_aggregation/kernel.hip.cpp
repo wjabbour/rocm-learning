@@ -2,16 +2,15 @@
 #include <iostream>
 
 __global__ void partial_reduction(int* in, int* out, int N) {
-    int sum  = 0;
-    std::cout << "hey" << "\n";
+    int sum = 0;
 
-    int tid = gridDim.x * blockDim.x + threadIdx.x;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for (int i = tid; i < N; i += gridDim.x * blockDim.x) {
         sum += in[i];
     }
 
-    out[tid] = 1;
+    out[tid] = sum;
 }
 
 int main() {
