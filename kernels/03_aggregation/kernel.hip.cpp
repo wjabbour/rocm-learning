@@ -14,7 +14,7 @@ __global__ void partial_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    const int N = 1 << 5;
+    const int N = 1 << 10;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
