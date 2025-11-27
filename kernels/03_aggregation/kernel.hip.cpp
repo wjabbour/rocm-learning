@@ -14,7 +14,7 @@ __global__ void partial_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    const int N = 10;
+    int N = 10;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -23,7 +23,7 @@ int main() {
     int *in_d, *out_d;
 
     int *in_h = (int*)malloc(size);
-    int *out_h = (int*)malloc(size);
+    int *out_h = (int*)malloc(blockSize * blockCount);
 
     hipMalloc(&in_d, size);
     hipMalloc(&out_d, size);
@@ -49,19 +49,28 @@ int main() {
 
     hipDeviceSynchronize();
 
-    
-    hipLaunchKernelGGL(
-        partial_reduction,
-        dim3(blockCount),
-        dim3(blockSize / 2), 
-        0,
-        0,
-        in_d,
-        out_d,
-        blockCount * blockSize
-    );
+    // hipMemset(in_d, 0, size);
 
-    hipDeviceSynchronize();
+    //  // copy the work done so far back to the input
+    // hipMemcpy(in_d, out_d, size, hipMemcpyDeviceToDevice);
+    
+    // hipMemset(out_d, 0, size);
+
+    // // the size of the input is now equal to the number of threads launched
+    // N = blockCount * blockSize;
+
+    // hipLaunchKernelGGL(
+    //     partial_reduction,
+    //     dim3(blockCount),
+    //     dim3(1), 
+    //     0,
+    //     0,
+    //     in_d,
+    //     out_d,
+    //     N
+    // );
+
+    // hipDeviceSynchronize();
 
 
     hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
