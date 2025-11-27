@@ -14,27 +14,27 @@ __global__ void partial_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    const int N = 1 << 10;
+    const int N = 10;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
     int blockCount = (N + blockSize - 1) / blockSize;
 
-    int *A_d, *B_d;
+    int *in_d, *out_d;
 
-    int *A_h = (int*)malloc(size);
-    int *B_h = (int*)malloc(size);
+    int *in_h = (int*)malloc(size);
+    int *out_h = (int*)malloc(size);
 
-    hipMalloc(&A_d, size);
-    hipMalloc(&B_d, size);
+    hipMalloc(&in_d, size);
+    hipMalloc(&out_d, size);
 
     for (int i = 0; i < N; i++) {
-        A_h[i] = i + 1;
-        B_h[i] = 0;
+        in_h[i] = i + 1;
+        out_h[i] = 0;
     }
 
-    hipMemcpy(A_d, A_h, size, hipMemcpyHostToDevice);
-    hipMemcpy(B_d, B_h, size, hipMemcpyHostToDevice);
+    hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
+    hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice);
 
     hipLaunchKernelGGL(
         partial_reduction,
@@ -42,23 +42,38 @@ int main() {
         dim3(blockSize), 
         0,
         0,
-        A_d,
-        B_d,
+        in_d,
+        out_d,
         N
     );
 
     hipDeviceSynchronize();
 
-    hipMemcpy(B_h, B_d, size, hipMemcpyDeviceToHost);
+    
+    hipLaunchKernelGGL(
+        partial_reduction,
+        dim3(blockCount),
+        dim3(blockSize / 2), 
+        0,
+        0,
+        in_d,
+        out_d,
+        blockCount * blockSize
+    );
+
+    hipDeviceSynchronize();
+
+
+    hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
 
     for (int i = 0; i < N; i++) {
-        std::cout << B_h[i] << "\n";
+        std::cout << out_h[i] << "\n";
     }
 
-    hipFree(A_d);
-    hipFree(B_d);
-    free(A_h);
-    free(B_h);
+    hipFree(in_d);
+    hipFree(out_d);
+    free(in_h);
+    free(out_h);
 
     return 0;
 }
