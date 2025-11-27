@@ -6,9 +6,9 @@ Aggregation kernels are very important to inference workloads - LayerNorm and So
 
 # Learnings
 
-- Memory coalescence is crucial. Most inference workloads spend their time primarily waiting for data, not calculating. We need to increase the efficiency of our memory operations whenever possible. The memory controller of a GPU is much wider than a CPU, fetching some hardware-based number of bits at a time. This memory controller is listening to requests from the threads running across the CUs. I conceptualize this controller as a server, listening to requests from its clients. It is batching the client requests to the upstream system (memory) and combining requests if they are requesting memory that is within the fetch bounds (the hardware-based number).
+- Memory coalescence is crucial. Most inference workloads spend their time primarily waiting for data, not calculating, because HBM is far slower than the compute throughput of a GPU. We need to increase the efficiency of our memory operations whenever possible. The memory controller of a GPU is much wider than a CPU, fetching cache lines (32B/64B/128B) at a time, depending on architecture. As threads issue loads, the memory fabric on the chip coalesces loads bound for the same cache lines into single, wide loads in order to optimize memory access.
 
-    This is why strided memory access (depending on the offset, it must be within the hardware-based fetch size for coalescence) is powerful. If we can construct work groups of threads which access contiguous memory then we can improve the memory performance of our kernel (however, we are hopelessly memory-bound due to hardware constraints).
+    For this aggregation kernel, I am careful to ensure that each thread is accessing contiuguous memory to its neighbor threads, and that as each thread in a block stride through the input, they are contiuing to fetch contiuguous memory. This ensures that the impact of global reads on latency is amortized across all of the threads - the GPU can satisfy the memory loads for all the threads in the block using a single HBM transaction.
 
 - This is my first time learning about multi-pass kernels. In the case of such a kernel, we must launch multiple kernels in order to finish the job. This required me to experiment a little more with the communication between host and device.
 
