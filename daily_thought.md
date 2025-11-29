@@ -1,5 +1,9 @@
 # Daily Thought
 
+## 11/28/2025
+
+PCIe is a multi-layer protocol for asynchronously (no shared clock) transmitting data between the host system and a device. Since a PCIe bus has its own internal clock, it is abstracted from the timing and other hardware aspects of the host system. These two facts enable a high degree of interopability between PCIe devices and host systems.
+
 ## 11/25/2025
 
 Bits don't exist. Only electricity exists.
