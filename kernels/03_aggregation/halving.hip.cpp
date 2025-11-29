@@ -22,7 +22,14 @@ __global__ void pairwise_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    int N = 19;
+    hipEvent_t start, stop;
+
+    hipEventCreate(&start);
+    hipEventCreate(&stop);
+
+    hipEventRecord(start, 0);
+
+    int N = 2 << 10;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -77,7 +84,7 @@ int main() {
         it just feels "right" to memcpy from device output pointer :) 
     */
     std::swap(in_d, out_d);
-    hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
+    hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost);
 
     // the answer!
     std::cout << out_h[0] << "\n";
@@ -86,6 +93,14 @@ int main() {
     hipFree(out_d);
     free(in_h);
     free(out_h);
+
+    hipEventRecord(stop, 0);
+    hipEventSynchronize(stop);
+
+    float ms = 0.0f;
+    hipEventElapsedTime(&ms, start, stop);
+
+    std::cout << "Kernel time = " << ms << " ms\n";
 
     return 0;
 }
