@@ -22,7 +22,7 @@ __global__ void pairwise_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    int N = 267;
+    int N = 19;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -61,19 +61,25 @@ int main() {
 
         hipDeviceSynchronize();
 
-        int* tmp = in_d;
-        in_d = out_d;
-        out_d = tmp;
+        /*
+            ping pong buffering
 
+            we alloc a fixed size buffer of data that we use through the 
+            entirety of the kernel
+        */
+        std::swap(in_d, out_d);
         currentN = (currentN + 1) / 2;
     }
 
-    int* tmp = in_d;
-    in_d = out_d;
-    out_d = tmp;
-
+    /*
+        since we swap the pointers after every kernel launch, in_d will
+        always hold the most recent output data. I swap once more here because
+        it just feels "right" to memcpy from device output pointer :) 
+    */
+    std::swap(in_d, out_d);
     hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
 
+    // the answer!
     std::cout << out_h[0] << "\n";
 
     hipFree(in_d);
