@@ -14,15 +14,15 @@ __global__ void pairwise_reduction(int* in, int* out, int N) {
     */
     if (i < N) {
         if (i + 1 < N) {
-            out[tid] = in[2*tid] + in[2*tid + 1];
+            out[tid] = in[i] + in[i + 1];
         } else {
-            out[tid] = in[2*tid];
+            out[tid] = in[i];
         }
     }
 }
 
 int main() {
-    int N = 10;
+    int N = 267;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -65,16 +65,16 @@ int main() {
         in_d = out_d;
         out_d = tmp;
 
-        currentN /= 2;
+        currentN = (currentN + 1) / 2;
     }
+
+    int* tmp = in_d;
+    in_d = out_d;
+    out_d = tmp;
 
     hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
 
     std::cout << out_h[0] << "\n";
-    std::cout << out_h[1] << "\n";
-    std::cout << out_h[2] << "\n";
-    std::cout << out_h[3] << "\n";
-    std::cout << out_h[4] << "\n";
 
     hipFree(in_d);
     hipFree(out_d);
