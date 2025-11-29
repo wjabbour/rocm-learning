@@ -10,7 +10,7 @@ Aggregation kernels are very important to inference workloads - LayerNorm and So
 
     For this aggregation kernel, I am careful to ensure that each thread is accessing contiuguous memory to its neighbor threads, and that as each thread in a block stride through the input, they are contiuing to fetch contiuguous memory. This ensures that the impact of global reads on latency is amortized across all of the threads - the GPU can satisfy the memory loads for all the threads in the block using a single HBM transaction.
 
-- This is my first time learning about multi-pass kernels. In the case of such a kernel, we must launch multiple kernels in order to finish the job. This required me to experiment a little more with the communication between host and device.
+- This is my first time learning about multi-pass kernels. In the case of such a kernel, we must launch multiple kernels in order to finish the job. This is required because the problem is one that requires the output of some blocks to be used as input for other stages of computation. Since there is no synchronization primitive offered for blocks in the same kernel launch, we must run the dependent blocks in separate kernel launches.
 
 - There are at least two ways to go about an aggregation: halving reduction and block-level reduction.
 
