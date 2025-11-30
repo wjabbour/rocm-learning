@@ -29,7 +29,7 @@ int main() {
 
     hipEventRecord(start, 0);
 
-    int N = 2 << 10;
+    int N = 1 << 20;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -53,6 +53,7 @@ int main() {
     int currentN = N;
 
     while (currentN > 1) {
+        // lazily, launching too many threads. I only need currentN / 2
         int blockCount = (currentN + blockSize - 1) / blockSize;
 
         hipLaunchKernelGGL(
@@ -71,7 +72,7 @@ int main() {
         /*
             ping pong buffering
 
-            we alloc a fixed size buffer of data that we use through the 
+            we alloc a two fixed size buffers of data that we use throughout the 
             entirety of the kernel
         */
         std::swap(in_d, out_d);
