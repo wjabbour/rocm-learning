@@ -14,7 +14,7 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 
 # Currently Working On
 
-I’m currently studying reduction-style patterns, including:
+I’m currently studying [reduction-style patterns](kernels/reduction), including:
 
 - register-level accumulators
 

@@ -171,7 +171,7 @@ int main() {
 
     hipLaunchKernelGGL(stencil3d_7pt, 
                         gridDim,
-                        blockDim, 
+                        blockDim,
                         0,
                         0,
                         in_d,

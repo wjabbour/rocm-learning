@@ -29,7 +29,7 @@ int main() {
 
     hipEventRecord(start, 0);
 
-    int N = 1 << 20;
+    int N = 1 << 21;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
