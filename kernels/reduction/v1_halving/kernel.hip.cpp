@@ -72,7 +72,7 @@ int main() {
         /*
             ping pong buffering
 
-            we alloc a two fixed size buffers of data that we use throughout the 
+            we alloc two fixed size buffers of data that we use throughout the 
             entirety of the kernel
         */
         std::swap(in_d, out_d);
