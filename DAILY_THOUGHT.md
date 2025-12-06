@@ -1,5 +1,11 @@
 # Daily Thought
 
+## 12/6/2025
+
+GPU architecture enables highly parallel computation, but at the expense of scheduling freedom. For example, waves of the same kernel are typically bound to the same set of CUs by the scheduler because the cost of switching between kernels with different memory and register footprints is expensive. CPUs operate in an inherently different manner, relying on fast context-switching and pre-emption to make slices of progress across potentially thousands of processes.
+
+There must be a compromise.
+
 ## 12/3/2025
 
 An if statement in a kernel can negatively impact perforamnce via branch divergence.
