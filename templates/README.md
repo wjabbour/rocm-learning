@@ -1,0 +1,1 @@
+This directory contains templates for commonly created md files
