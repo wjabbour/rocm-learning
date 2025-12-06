@@ -10,9 +10,9 @@
 
 ## Performance Summary
 
-| Implementation | Kernel Time (ns) | N   | Δ vs v1 |
-| -------------- | ---------------- | --- | ------- |
-| **v1**         | 1                | 100 | -       |
+| Implementation | Kernel Time (ms) | System Time (ms) | N   | Δ Kernel vs v1 | Δ System vs v1 |
+| -------------- | ---------------- | ---------------- | --- | -------------- | -------------- |
+| **v1**         | 1                | 1                | 100 | -              | -              |
 
 ### Description
 

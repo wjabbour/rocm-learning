@@ -22,14 +22,13 @@ __global__ void pairwise_reduction(int* in, int* out, int N) {
 }
 
 int main() {
-    hipEvent_t start, stop;
+    hipEvent_t sys_start, sys_stop;
+    hipEventCreate(&sys_start);
+    hipEventCreate(&sys_stop);
 
-    hipEventCreate(&start);
-    hipEventCreate(&stop);
+    hipEventRecord(sys_start, 0); 
 
-    hipEventRecord(start, 0);
-
-    int N = 1 << 21;
+    int N = 1 << 20;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -52,9 +51,17 @@ int main() {
 
     int currentN = N;
 
+    hipEvent_t k_start, k_stop;
+    hipEventCreate(&k_start);
+    hipEventCreate(&k_stop);
+
+    float kernel_total_μs = 0.0f;
+
     while (currentN > 1) {
         // lazily, launching too many threads. I only need currentN / 2
         int blockCount = (currentN + blockSize - 1) / blockSize;
+
+        hipEventRecord(k_start, 0);
 
         hipLaunchKernelGGL(
             pairwise_reduction,
@@ -66,6 +73,13 @@ int main() {
             out_d,
             currentN
         );
+
+        hipEventRecord(k_stop, 0);
+        hipEventSynchronize(k_stop);
+
+        float k_μs = 0.0f;
+        hipEventElapsedTime(&k_μs , k_start, k_stop);
+        kernel_total_μs += k_μs;
 
         hipDeviceSynchronize();
 
@@ -95,13 +109,14 @@ int main() {
     free(in_h);
     free(out_h);
 
-    hipEventRecord(stop, 0);
-    hipEventSynchronize(stop);
+    hipEventRecord(sys_stop, 0);
+    hipEventSynchronize(sys_stop);
 
-    float ms = 0.0f;
-    hipEventElapsedTime(&ms, start, stop);
+    float sys_ms = 0.0f;
+    hipEventElapsedTime(&sys_ms, sys_start, sys_stop);
 
-    std::cout << "Kernel time = " << ms << " ms\n";
+    std::cout << "Kernel-only time = " << kernel_total_μs * 1000 << " μs\n";
+    std::cout << "System time (host+device) = " << sys_ms << " ms\n";
 
     return 0;
 }
