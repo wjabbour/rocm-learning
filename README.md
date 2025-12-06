@@ -4,7 +4,7 @@ Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primaril
 
 This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
-There are three directories:
+There are three important directories:
 
 - `kernels` - I explore different kernels and include a write up of what I learned and how it relates to inference.
 - `papers` - I summarize and discuss different papers.
