@@ -1,5 +1,6 @@
 #include <hip/hip_runtime.h>
 #include <iostream>
+#include "utils/random_int.hpp"
 
 __global__ void pairwise_reduction(int* in, int* out, int N) {
     int sum = 0;
@@ -28,7 +29,7 @@ int main() {
 
     hipEventRecord(sys_start, 0); 
 
-    int N = 1 << 20;
+    int N = 1 << 25;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -42,7 +43,7 @@ int main() {
     hipMalloc(&out_d, size);
 
     for (int i = 0; i < N; i++) {
-        in_h[i] = i + 1;
+        in_h[i] = Utils::Random::int_in_range(1, 10);
         out_h[i] = 0;
     }
 
