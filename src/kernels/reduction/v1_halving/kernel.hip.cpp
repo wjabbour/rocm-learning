@@ -29,7 +29,7 @@ int main() {
 
     hipEventRecord(sys_start, 0); 
 
-    int N = 1 << 25;
+    int N = 1 << 30;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -43,7 +43,7 @@ int main() {
     hipMalloc(&out_d, size);
 
     for (int i = 0; i < N; i++) {
-        in_h[i] = Utils::Random::int_in_range(1, 10);
+        in_h[i] = Utils::Random::int_in_range(1, 5);
         out_h[i] = 0;
     }
 

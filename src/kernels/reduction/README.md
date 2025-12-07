@@ -22,8 +22,6 @@ Aggregation kernels are very important for inference workloads - LayerNorm and S
 
 - The size of a hardware wavefront on my RDNA GPU is 32, whereas most CDNA GPUs have a wavefront size of 64.
 
-- The notion and importance of latency hiding was reinforced. The halving kernel is a multi-pass kernel where the wavefronts of the kernel request data from global memory. The kernel has no LDS usage, very low register pressure due to the small amount of variable declaration and operations present, which means the CU occupancy is high for this kernel. Even though the kernel is apparently memory-bound, performance scales linearly for N
+- The notion and importance of latency hiding was reinforced. The halving kernel is a multi-pass kernel where the wavefronts of the kernel request data from global memory. The kernel has no LDS usage, very low register pressure due to the small amount of variable declarations and operations present, which means that many wavefronts are simultaneously resident on the CU (occupancy). Even though the kernel is memory-bound, performance scales linearly for N because the wavefront executing on a SIMD is pre-empted by the CU scheduler when the scheduler detects that the SIMD is waiting on a high-latency operation (like global memory fetch).
 
-- Consulted the [rocprofv3 docs](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/how-to/using-rocprofv3.html) in order to understand which hardware counters I had access to on my GPU. 
-
-    - MAX_WAVE_SIZE - the maximum wavefront size that 
+- Consulted the [rocprofv3 docs](https://rocm.docs.amd.com/projects/rocprofiler-sdk/en/latest/how-to/using-rocprofv3.html) in order to understand which hardware counters I had access to on my GPU.
