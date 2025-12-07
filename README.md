@@ -6,15 +6,15 @@ This repository is my space to learn in public as I delve into GPU kernel engine
 
 There are three important directories:
 
-- `kernels` - I explore different kernels and include a write up of what I learned and how it relates to inference.
-- `papers` - I summarize and discuss different papers.
-- `topics` - I dive deep into some specific topic.
+- [kernels](src/kernels) - I explore different kernels and include a write up of what I learned and how it relates to inference.
+- [papers](papers)  - I summarize and discuss different papers.
+- [topics](topics) - I dive deep into some specific topic.
 
 My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU software stack, with a focus on high-performance inference.
 
 # Currently Working On
 
-I’m currently studying [reduction-style patterns](kernels/reduction), including:
+I’m currently studying [reduction-style patterns](src/kernels/reduction), including:
 
 - register-level accumulators
 
