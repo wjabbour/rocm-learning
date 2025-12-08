@@ -3,18 +3,15 @@
 #include "utils/random_int.hpp"
 
 __global__ void pairwise_reduction(int* in, int* out, int N) {
-    int sum = 0;
-
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = tid * 2;
+    int i = tid * 4;
 
-    /*
-        consider N = 5, tid 0 computes 0 + 1, tid 1 computes 2 + 3,
-        index 4's partner of 5 is OOB, so we just need to pull 
-        index 4 forward.
-    */
     if (i < N) {
-        if (i + 1 < N) {
+        if (i + 3 < N) {
+            out[tid] = in[i] + in[i + 1] + in[i + 2] + in[i + 3];
+        } else if (i + 2 < N) {
+            out[tid] = in[i] + in[i + 1] + in[i + 2];
+        } else if (i + 1 < N) {
             out[tid] = in[i] + in[i + 1];
         } else {
             out[tid] = in[i];
@@ -59,8 +56,9 @@ int main() {
     float kernel_total_μs = 0.0f;
 
     while (currentN > 1) {
-        // lazily, launching too many threads. I only need currentN / 2
-        int blockCount = (currentN + blockSize - 1) / blockSize;
+        // lazily, launching too many threads. I only need currentN / 4
+        int outputSize = (currentN + 3) / 4;
+        int blockCount = (outputSize + blockSize - 1) / blockSize;
 
         hipEventRecord(k_start, 0);
 
@@ -91,7 +89,7 @@ int main() {
             entirety of the kernel
         */
         std::swap(in_d, out_d);
-        currentN = (currentN + 1) / 2;
+        currentN = outputSize;
     }
 
     /*

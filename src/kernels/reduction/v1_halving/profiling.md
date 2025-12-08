@@ -10,9 +10,9 @@
 
 ## Performance Summary
 
-| Implementation | Kernel Time (μs) | System Time (ms) | N       | Δ Kernel vs v1 | Δ System vs v1 |
-| -------------- | ---------------- | ---------------- | ------- | -------------- | -------------- |
-| **v1**         | 50518            | 8298             | 1 << 30 | -              | -              |
+| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
+| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
+| **v1**         | 50,518           | 8,298            | 2^30 | -                    | -                    |
 
 ### Description
 
@@ -50,3 +50,34 @@ Let's increase the per-thread workload. Instead of reducing two elements per thr
 - N shrinks more aggressively - fewer reduction passes
 - Fewer small-N kernel launches where runtime is dominated by fixed launch overhead.
 - Increased arithmetic intensity per wavefront = improved latency hiding. The CU scheduler is always looking for wavefronts that are ready to execute, i.e. wavefronts that are not stalled waiting on HBM. In a low-arithmetic intensity kernel, each wavefront quickly consumes its data and returns to a stalled state, making it harder for the CU to find ready waves. By increasing arithmetic intensity, each wavefront performs more ALU work for every HBM load, spending more time in a ready-to-execute state. This increases the likelihood that the CU can issue useful work while other wavefronts are stalled.
+
+## Second Implementation
+
+## Performance Summary
+
+| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
+| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
+| **v1**         | 50,518           | 8,298            | 2^30 | -                    | -                    |
+| **v2**         | 20,969           | 8,151            | 2^30 | 2.4x faster          | 1.01x faster         |
+
+### Description
+
+- 1
+- 2
+- 3
+
+### Profiling Observations
+
+- 1
+- 2
+- 3
+
+### Diagnosis
+
+- 1
+- 2
+- 3
+
+### Suggested Improvements
+
+{description}
