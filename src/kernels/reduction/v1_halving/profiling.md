@@ -16,7 +16,7 @@
 
 ### Description
 
-This is my first time profiling a kernel so I'm going to get a few things (or everything) wrong.
+This is my first time profiling a kernel so I'm going to get a few things (or everything) wrong :smirk:.
 
 Each thread is responsible for adding two elements from global input and writing one value to global output. First we launch a kernel with gridSize = N, then we launch a kernel with gridSize = N/2 and so on until N/2 = k = 1.
 
