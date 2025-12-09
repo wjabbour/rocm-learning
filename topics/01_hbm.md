@@ -2,12 +2,24 @@
 
 # High Bandwidth Memory
 
-HBM is a special kind of DRAM which is physically part of the GPU package. It acts as the RAM of the GPU.
+HBM is a specialized form of DRAM which sits physically inside the GPU package, acting as the RAM of the GPU. It's design is fundamentally different from CPU RAM due to the difference in how CPUs and GPUs access memory.
 
-the key thing is that cpus and gpus are different, a cpu core is serially executing instructions, so buses don't need to be as wide (just need to be wide enough to deliver the word size of the architecture 32 bit or 64 bit) whereas GPUs are executing thousands of threads in parallel - the bus lanes need to be huge, memory needs to be as close as possible to compute,
+## CPU vs GPU
 
-DIMM is dual in module memory, this is CPU memory, removable + upgradable, relatively far from CPU (few inches). DIMM use a printed circuit board (PCB) with copper wiring called traces. The traces can be used to carry data, power, and clock or control signals. Because the traces are so far from the CPU, timing skew can be an issue and signal integrity can be an issue. There is a theoretical maximum bandwidth for memory designed in this fashion that is too low to support the needs of the GPU.
+A physical CPU core executes instructions serially, so the memory system only needs to provide each core with enough data per clock cycle to feed a single instruction. The memory channel literally only needs to be 64 or 128 bits wide.
 
-HBM is architected without copper traces entirely. The HBM sits on the same physical package as the GPU, connected by microscopic interposer wiring which enables wide lanes that don't need as high frequency to match the bandwidth of DIMM. This far exceeds the maximum bandwidth of DIMM.
+The SIMD lanes in a GPU's compute unit execute instructions in parallel. A SIMD might have 32 or 64 lanes, a compute unit might have 2-4 SIMDs, and a GPU might have 40+ compute units. Each of these 2560 (at least) lanes loads up to 64 bits every clock cycle.
 
-DIMMs and HBM are constructed completely differently. a DIMM is multiple DRAM chips soldered onto a PCB, transferring data via copper traces. This is a horizontal layout with a small bus, at the benefit of cheap storage with very high frequency. HBM is a series of DRAM chips, vertically layered directly onto each other, all connected to each other via through-silicon vias which are copper pilars acting as elevators.
+This requires orders of magnitude higher memory bandwidth.
+
+## Can DIMM Scale?
+
+DIMM = Dual Inline Memory Module
+
+If you've ever built or owned a gaming PC, or a PC in general, you are probably familiar with the physical appearance of DIMMs. A DIMM is a long, narrow printed circuit board (PCB) with several DRAM chips soldered onto it. The DIMM plugs into the motherboard, typically a few inches from the CPU. The DIMM communicates with the CPU using copper wiring (called traces) on the motherboard.
+
+The physical design of DIMM has a few limitations which makes it unsuitable for the high-bandwidth requirement of a GPU:
+
+- Traces are physically large (relatively)
+
+  Every bit transferred between the DIMM and the CPU requires its own copper trace. The DIMM must also transfer additional control, clock, and address information which also require their own traces. This means that for a DIMM to transfer 64 bits per clock cycle, there must be **well over 100 copper traces between the DIMM slot and the CPU.**
