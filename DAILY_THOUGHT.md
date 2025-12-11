@@ -8,7 +8,7 @@ There must be a compromise.
 
 ## 12/3/2025
 
-An if statement in a kernel can negatively impact perforamnce via branch divergence.
+An if statement in a kernel can negatively impact performance via branch divergence.
 
 ## 11/28/2025
 
