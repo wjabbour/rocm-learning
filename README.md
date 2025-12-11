@@ -1,6 +1,6 @@
 # About Me
 
-Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node.js and React. Over the last year I’ve become deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
+Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node.js and React. Over the two months I’ve become deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
 This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
@@ -14,25 +14,10 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 
 # Currently Working On
 
-I’m currently studying [reduction-style patterns](src/kernels/reduction), including:
+I’m currently studying [reduction-style patterns](src/kernels/reduction), focusing on GEMM.
 
-- register-level accumulators
-
-- strided memory access
-
-- block-level aggregation
-
-- reduction via LDS and warp shuffles
-
-I recently completed a 3D 7-point stencil kernel with configurable halo sizes, using tiling into LDS to minimize global memory traffic. This taught me a lot about:
-
-- shared memory layout
-
-- halo regions
-
-- coalesced reads/writes
-
-- occupancy and register pressure
+I just finished working on a [Softmax kernel](kernels/aggregation/v3_softmax/kernel.hip.cpp) which was a great
+introduction to the kernels at the heart of inference.
 
 # Scheduled Learning
 
@@ -54,9 +39,9 @@ PagedAttention, KV-cache management, continuous batching, speculative decoding, 
 
 ### Profiling & Debugging
 
-rocprof, occupancy analysis, register pressure, DMA behavior, and memory bandwidth tuning.
+rocprof, occupancy analysis, register pressure.
 
 # Contact
 
-doubleujabbour@gmail.com <br>
+doubleujabbour@gmail.com  
 [LinkedIn](https://linkedin.com/in/doubleujabbour)
