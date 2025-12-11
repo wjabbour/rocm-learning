@@ -4,18 +4,20 @@
 
 __global__ void pairwise_reduction(int* in, int* out, int N) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = tid * 4;
+    int i = tid * 16;
 
     if (i < N) {
-        if (i + 3 < N) {
-            out[tid] = in[i] + in[i + 1] + in[i + 2] + in[i + 3];
-        } else if (i + 2 < N) {
-            out[tid] = in[i] + in[i + 1] + in[i + 2];
-        } else if (i + 1 < N) {
-            out[tid] = in[i] + in[i + 1];
-        } else {
-            out[tid] = in[i];
+        int sum = 0;
+        for (int j = 15; j >= 0; j--) {
+            if (i + j < N) {
+                for (int k = j; k >= 0; k--) {
+                    sum += in[i + k];
+                }
+                break;
+            }
         }
+
+        out[tid] = sum;
     }
 }
 
@@ -57,7 +59,7 @@ int main() {
 
     while (currentN > 1) {
         // lazily, launching too many threads. I only need currentN / 4
-        int outputSize = (currentN + 3) / 4;
+        int outputSize = (currentN + 15) / 16;
         int blockCount = (outputSize + blockSize - 1) / blockSize;
 
         hipEventRecord(k_start, 0);
