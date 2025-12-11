@@ -1,12 +1,12 @@
 ## 12/10/2025 - Stable Softmax
 
-[source](kernels/aggregation/v3_softmax/kernel.hip.cpp)
+[source](kernels/reduction/v3_softmax/kernel.hip.cpp)
 
 My first introduction to Softmax, the expf function, and warp shuffling.
 
 ## 12/05/2025
 
-[source](kernels/aggregation/v1_halving/kernel.hip.cpp)
+[source](kernels/reduction/v1_halving/kernel.hip.cpp)
 
 Wrote a simple aggregation kernel which launches log2(N) kernels to
 process input of size N. Spent a lot of time profiling this kernel with
