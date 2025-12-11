@@ -1,6 +1,5 @@
 ## 12/10/2025 - Stable Softmax
 
-src/kernels/reduction/v3_softmax/kernel.hip.cpp
 [source](src/kernels/reduction/v3_softmax/kernel.hip.cpp)
 
 My first introduction to Softmax, the expf function, and warp shuffling.
