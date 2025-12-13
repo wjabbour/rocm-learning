@@ -1,5 +1,13 @@
 # Daily Thought
 
+## 12/13/2025
+
+To create artificial intelligence, it's helpful to create computational systems in the spirit of biological systems.
+
+For example, we associate some importance with our memories which dictates how quickly we can recall, and for how long we can retain those memories.
+
+If we can apply a similar idea to LLMs, we could increase the usefulness of the context window.
+
 ## 12/6/2025
 
 GPU architecture enables highly parallel computation, but at the expense of scheduling freedom. For example, waves of the same kernel are typically bound to the same set of CUs by the scheduler because the cost of switching between kernels with different memory and register footprints is expensive. CPUs operate in an inherently different manner, relying on fast context-switching and pre-emption to make slices of progress across potentially thousands of processes.
