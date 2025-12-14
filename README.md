@@ -14,7 +14,7 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 
 # Currently Working On
 
-I’m currently studying [reduction-style patterns](src/kernels/reduction), focusing on GEMM.
+I’m currently studying [GEMM](src/kernels/gemm).
 
 I just finished working on a [Softmax kernel](src/kernels/reduction/v3_softmax/kernel.hip.cpp) which was a great
 introduction to the kernels at the heart of inference.
