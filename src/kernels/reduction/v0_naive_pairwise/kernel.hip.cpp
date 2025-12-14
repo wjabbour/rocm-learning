@@ -1,8 +1,19 @@
 #include <hip/hip_runtime.h>
 #include <iostream>
 
-__global__ void add_kernel(int* A, int* B, int* C, int N) {
+/*
+    My very first kernel
 
+    Receives a pointer to input A, input B, and output C.
+
+    A and B both represent 1D input arrays and C represents a 1D output array.
+
+    We launch N threads to process input of size N, where N = A.length = B.length
+
+    Thus, each thread computes its global index in the grid and access A[idx] and B[idx],
+    performs some calculation (in this case, addition) and writes to C[idx]
+*/
+__global__ void add_kernel(int* A, int* B, int* C, int N) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (idx > N) return;
@@ -11,7 +22,7 @@ __global__ void add_kernel(int* A, int* B, int* C, int N) {
 }
 
 int main() {
-    const int N = 1 << 20; // 1 million elements
+    const int N = 1 << 20;
     size_t size = N * sizeof(int);
 
     int blockSize = 256;
