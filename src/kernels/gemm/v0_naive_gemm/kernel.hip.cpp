@@ -26,8 +26,8 @@ __global__ void matmul(float* A, float* B, float* C, int width) {
 
 
         // j is 0 through 15
-        for (let j = 0; j < TILE_SIZE; j++) {
-           // TODO
+        for (int j = 0; j < TILE_SIZE; j++) {
+           sum += tile_A[ty][j] * tile_B[j][tx];
         }
 
         __syncthreads();
