@@ -25,25 +25,28 @@ __global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int 
         input matrices A and B are given as 1D contiguous memory blocks stored in row-major order
     */
     for (int k = 0; k < K; k += TILE_SIZE) {
+        int aCol = k + tx;
+        int bRow = k + ty;
+
         // all threads in the wavefront request contiguous memory addresses from input matrix A
-        int aIdx = (row * K) + tx + k;
+        int aIdx = row * K + aCol;
         /*
             since the input is stored in row major order, we cannot fetch a column of data
             from B without executing N memory transactions (where N = size of column) per wavefront. To improve
             memory coalescense, threads in the wavefront collaboratively load in a row of length TILE_SIZE from B, all
             wavefronts in the block working together to load the full tile from B across TILE_SIZE memory transactions.
         */
-        int bIdx = (k + ty) * N + col;
+        int bIdx = bRow * N + col;
 
         // now that we've done the mental gymnastics to identify which piece of data to pull from A and B...
 
-        if (row < M && (tx + k) <  K) {
+        if (row < M && aCol < K) {
             tile_A[ty][tx] = A[aIdx];
         } else {
             tile_A[ty][tx] = 0.0f;
         }
 
-        if ((k + ty) < K && col < N) {
+        if (col < N && bRow < K) {
             tile_B[ty][tx] = B[bIdx];
         } else {
             tile_B[ty][tx] = 0.0f;
