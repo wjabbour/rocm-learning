@@ -102,10 +102,10 @@ int main() {
     // we dont need to copy C to the device because we are going to overwrite it
 
     // specify grid dimensions
-    int blockSize = 256;
-    int blockCount = (M * N + blockSize - 1) / blockSize;
+    dim3 blockSize(TILE_SIZE, TILE_SIZE);
+    dim3 numBlocks((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
-    hipLaunchKernelGGL(matrix_multiply, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
+    hipLaunchKernelGGL(matrix_multiply, dim3(numBlocks), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
     hipDeviceSynchronize();
 
     hipMemcpy(C_h.data(), C_d, bytesC, hipMemcpyDeviceToHost);
