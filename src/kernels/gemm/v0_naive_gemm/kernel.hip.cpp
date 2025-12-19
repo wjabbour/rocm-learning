@@ -1,5 +1,6 @@
 #include <hip/hip_runtime.h>
 #include <iostream>
+#include <vector>
 
 #define TILE_SIZE 16
 
@@ -21,7 +22,7 @@ __global__ void matmul(float* A, float* B, float* C, int width) {
     /*
         each block of threads walks horizontally along input matrix A and vertically along input matrix B
 
-         input matrices A and B are given as 1D contiguous memory blocks stored in row-major order
+        input matrices A and B are given as 1D contiguous memory blocks stored in row-major order
     */
     for (int k = 0; k < width; k += TILE_SIZE) {
         // all threads in the wavefront request contiguous memory addresses from input matrix A
@@ -43,7 +44,7 @@ __global__ void matmul(float* A, float* B, float* C, int width) {
 
         /*
             although the threads of the block work together to collaboratively load LDS, once it's time to calculate, each thread
-            simply needs to walk horizontally along A and vertically along B to perform the matrix multiplication.
+            simply needs to walk horizontally along tile A and vertically along tile B to perform the matrix multiplication.
 
             Notice that we are now able to walk along the column in our B tile. We don't have to worry about coalescing our memory
             reads any longer. Access to LDS is extremely fast for each thread.
@@ -56,11 +57,21 @@ __global__ void matmul(float* A, float* B, float* C, int width) {
         __syncthreads();
     }
 
+    // write to output in row major format
     C[row * width + col] = sum;
 }
 
 int main() {
-    const int N = 4;
+    const int N = 2;
+
+    std::vector<float> A = {1, 2};
+    std::vector<float> B = {1, 2};
+    std::vector<float> C;
+
+    int M = 2;
+    int N = 2;
+    int K = 1;
+
     size_t size = N * sizeof(float);
 
     int blockSize = 256;
@@ -84,7 +95,7 @@ int main() {
     hipMemcpy(A_d, A_h, size, hipMemcpyHostToDevice);
     hipMemcpy(B_d, B_h, size, hipMemcpyHostToDevice);
 
-    hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, N);
+    hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
     hipDeviceSynchronize();
 
     hipMemcpy(C_h, C_d, size, hipMemcpyDeviceToHost);
