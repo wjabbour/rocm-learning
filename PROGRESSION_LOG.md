@@ -1,3 +1,10 @@
+## 12/18/2025 - Naive GEMM
+
+[source](src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp)
+
+My first introduction to GEMM and matrix multiplication in general. Came to a better understanding of
+LDS, banks, and bank conflicts.
+
 ## 12/10/2025 - Stable Softmax
 
 [source](src/kernels/reduction/v3_softmax/kernel.hip.cpp)
