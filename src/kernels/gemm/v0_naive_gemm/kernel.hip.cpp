@@ -4,7 +4,7 @@
 
 #define TILE_SIZE 16
 
-__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
+__global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int K) {
     // a TILE_SIZE by TILE_SIZE LDS tile we will use to store the contents of input matrix A that our block will operate on
     __shared__ float tile_A[TILE_SIZE][TILE_SIZE];
     // a TILE_SIZE by TILE_SIZE LDS tile we will use to store the contents of input matrix B that our block will operate on
@@ -24,16 +24,16 @@ __global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
 
         input matrices A and B are given as 1D contiguous memory blocks stored in row-major order
     */
-    for (int k = 0; k < width; k += TILE_SIZE) {
+    for (int k = 0; k < K; k += TILE_SIZE) {
         // all threads in the wavefront request contiguous memory addresses from input matrix A
-        int aIdx = (row * width) + tx + k;
+        int aIdx = (row * K) + tx + k;
         /*
             since the input is stored in row major order, we cannot fetch a column of data
             from B without executing N memory transactions (where N = size of column) per wavefront. To improve
             memory coalescense, threads in the wavefront collaboratively load in a row of length TILE_SIZE from B, all
             wavefronts in the block working together to load the full tile from B across TILE_SIZE memory transactions.
         */
-        int bIdx = (k + ty) * width + col;
+        int bIdx = (k + ty) * N + col;
 
         // now that we've done the mental gymnastics to identify which piece of data to pull from A and B...
         tile_A[ty][tx] = A[aIdx];
@@ -58,7 +58,7 @@ __global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
     }
 
     // write to output in row major format
-    C[row * width + col] = sum;
+    C[row * N + col] = sum;
 }
 
 int main() {
@@ -87,18 +87,18 @@ int main() {
     hipMalloc(&C_d, bytesC);
 
     // host -> device transfer
-    hipMemcpy(A_d, A_h, bytesA, hipMemcpyHostToDevice);
-    hipMemcpy(B_d, B_h, bytesB, hipMemcpyHostToDevice);
+    hipMemcpy(A_d, A_h.data(), bytesA, hipMemcpyHostToDevice);
+    hipMemcpy(B_d, B_h.data(), bytesB, hipMemcpyHostToDevice);
     // we dont need to copy C to the device because we are going to overwrite it
 
     // specify grid dimensions
     int blockSize = 256;
     int blockCount = (M * N + blockSize - 1) / blockSize;
 
-    hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
+    hipLaunchKernelGGL(matrix_multiply, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
     hipDeviceSynchronize();
 
-    hipMemcpy(C_h, C_d, bytesC, hipMemcpyDeviceToHost);
+    hipMemcpy(C_h.data(), C_d, bytesC, hipMemcpyDeviceToHost);
 
     for (int i = 0; i < M * N; i++) {
         std::cout << C_h[i] << "\n";
