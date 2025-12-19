@@ -2,13 +2,15 @@
 #include <iostream>
 #include "utils/random_int.hpp"
 
+#define WORK_PER_THREAD 8
+
 __global__ void pairwise_reduction(int* in, int* out, int N) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = tid * 16;
+    int i = tid * WORK_PER_THREAD;
 
     if (i < N) {
         int sum = 0;
-        for (int j = 15; j >= 0; j--) {
+        for (int j = WORK_PER_THREAD - 1; j >= 0; j--) {
             if (i + j < N) {
                 for (int k = j; k >= 0; k--) {
                     sum += in[i + k];
@@ -59,7 +61,7 @@ int main() {
 
     while (currentN > 1) {
         // lazily, launching too many threads. I only need currentN / 4
-        int outputSize = (currentN + 15) / 16;
+        int outputSize = (currentN + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
         int blockCount = (outputSize + blockSize - 1) / blockSize;
 
         hipEventRecord(k_start, 0);
