@@ -36,8 +36,18 @@ __global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int 
         int bIdx = (k + ty) * N + col;
 
         // now that we've done the mental gymnastics to identify which piece of data to pull from A and B...
-        tile_A[ty][tx] = A[aIdx];
-        tile_B[ty][tx] = B[bIdx];
+
+        if (row < M && (tx + k) <  K) {
+            tile_A[ty][tx] = A[aIdx];
+        } else {
+            tile_A[ty][tx] = 0.0f;
+        }
+
+        if ((k + ty) < K && col < N) {
+            tile_B[ty][tx] = B[bIdx];
+        } else {
+            tile_B[ty][tx] = 0.0f;
+        }
 
         // before any wavefront can work with the data in LDS, we must ensure that all wavefronts have finished writing to LDS
         __syncthreads();
@@ -50,7 +60,7 @@ __global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int 
             reads any longer. Access to LDS is extremely fast for each thread.
         */
         for (int j = 0; j < TILE_SIZE; j++) {
-           sum += tile_A[ty][j] * tile_B[j][tx];
+            sum += tile_A[ty][j] * tile_B[j][tx];
         }
 
         // ensure that wavefronts in our block do not begin altering LDS data until all of the wavefronts have completed their calculations
