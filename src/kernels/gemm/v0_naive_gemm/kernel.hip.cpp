@@ -4,7 +4,7 @@
 
 #define TILE_SIZE 16
 
-__global__ void matmul(float* A, float* B, float* C, int width) {
+__global__ void matmul(float* A, float* B, float* C, int M, int N, int K) {
     // a TILE_SIZE by TILE_SIZE LDS tile we will use to store the contents of input matrix A that our block will operate on
     __shared__ float tile_A[TILE_SIZE][TILE_SIZE];
     // a TILE_SIZE by TILE_SIZE LDS tile we will use to store the contents of input matrix B that our block will operate on
@@ -62,54 +62,53 @@ __global__ void matmul(float* A, float* B, float* C, int width) {
 }
 
 int main() {
-    const int N = 2;
-
-    std::vector<float> A = {1, 2};
-    std::vector<float> B = {1, 2};
-    std::vector<float> C;
-
+    /*
+        we need to specify the dimensions of our matrices so that the kernel
+        is generalizable to matrices of arbitrary dimensions
+    */
     int M = 2;
     int N = 2;
     int K = 1;
 
-    size_t size = N * sizeof(float);
+    // given by the definition of matrix multiplication
+    const size_t bytesA = M * K * sizeof(float);
+    const size_t bytesB = K * N * sizeof(float);
+    const size_t bytesC = M * N * sizeof(float);
 
+    // allocate host memory
+    std::vector<float> A_h = {1.0f, 2.0f};
+    std::vector<float> B_h = {1.0f, 2.0f};
+    std::vector<float> C_h(M * N, 0.0f);
+ 
+    // allocate device memory
+    float *A_d, *B_d, *C_d;
+    hipMalloc(&A_d, bytesA);
+    hipMalloc(&B_d, bytesB);
+    hipMalloc(&C_d, bytesC);
+
+    // host -> device transfer
+    hipMemcpy(A_d, A_h, bytesA, hipMemcpyHostToDevice);
+    hipMemcpy(B_d, B_h, bytesB, hipMemcpyHostToDevice);
+    // we dont need to copy C to the device because we are going to overwrite it
+
+    // specify grid dimensions
     int blockSize = 256;
-    int blockCount = (N + blockSize - 1) / blockSize;
-
-    int *A_d, *B_d, *C_d;
-
-    int *A_h = (int*)malloc(size);
-    int *B_h = (int*)malloc(size);
-    int *C_h = (int*)malloc(size);
-
-    hipMalloc(&A_d, size);
-    hipMalloc(&B_d, size);
-    hipMalloc(&C_d, size);
-
-    for (int i = 0; i < N; i++) {
-        A_h[i] = i;
-        B_h[i] = i*2;
-    }
-
-    hipMemcpy(A_d, A_h, size, hipMemcpyHostToDevice);
-    hipMemcpy(B_d, B_h, size, hipMemcpyHostToDevice);
+    int blockCount = (M * N + blockSize - 1) / blockSize;
 
     hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
     hipDeviceSynchronize();
 
-    hipMemcpy(C_h, C_d, size, hipMemcpyDeviceToHost);
+    hipMemcpy(C_h, C_d, bytesC, hipMemcpyDeviceToHost);
 
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < M * N; i++) {
         std::cout << C_h[i] << "\n";
     }
 
-    hipFree(A_h);
-    hipFree(B_h);
-    hipFree(C_h);
-    free(A_d);
-    free(B_d);
-    free(C_d);
+    hipFree(A_d);
+    hipFree(B_d);
+    hipFree(C_d);
+
+    // vectors use the RAII principle, calling their destructors when the function scope ends
 
     return 0;
 }
