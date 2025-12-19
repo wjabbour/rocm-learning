@@ -104,8 +104,18 @@ int main() {
     hipMemcpy(B_d, B_h.data(), bytesB, hipMemcpyHostToDevice);
     // we dont need to copy C to the device because we are going to overwrite it
 
-    // specify grid dimensions
+    /*
+        with this implementation, each thread in the block collaboritvely loads a piece of data
+        into LDS, therefore the block dimensions exactly match the LDS data dimensions
+    */
     dim3 blockSize(TILE_SIZE, TILE_SIZE);
+    /*
+        Matrix A is MxK, Matrix B is KxN, thus the output is MxN (M rows, N columns)
+
+        The dim3 struct positional arguments are x, y, then z. Since x and N both correspond
+        with horizontal movement and y and M both correspond with vertical movement, we must
+        be careful to initialize the grid as NxM threads to unify threads to matrix indices.
+    */
     dim3 numBlocks((N + TILE_SIZE - 1) / TILE_SIZE, (M + TILE_SIZE - 1) / TILE_SIZE);
 
     hipLaunchKernelGGL(matrix_multiply, dim3(numBlocks), dim3(blockSize), 0, 0, A_d, B_d, C_d, M, N, K);
