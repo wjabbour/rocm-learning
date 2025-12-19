@@ -8,7 +8,7 @@ The `Summary and Relation to Inference` section is the main takeaway of this wri
 
 ## Summary and Relation to Inference
 
-GPUs were originally created to solve a highly parallel problem: draw a million pixels on the screen. That highly parallel problem created a computer architecture that was amenable to solving tasks in wildly different domains. As AMD and Nvidia realized that domains outside of computer graphics benefitted from this parallel GPU architecture, both companies moved to create separate hardware architectures for their consumer (graphics) and enterprise (AI + HPC) workloads.
+GPUs were originally created to solve a highly parallel problem: draw a million pixels on the screen as fast as possible. That highly parallel problem created a computer architecture that was amenable to solving tasks in wildly different domains. As AMD and Nvidia realized that domains outside of computer graphics benefitted from this parallel GPU architecture, both companies moved to create separate hardware architectures for their consumer (graphics) and enterprise (AI + HPC) workloads.
 
 Compute DNA (CDNA) is AMD's AI + HPC GPU architecture and Radeon DNA (RDNA) is AMD's consumer architecture.
 
