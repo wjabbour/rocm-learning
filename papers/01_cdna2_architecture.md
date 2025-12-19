@@ -1,5 +1,3 @@
-![WIP](https://img.shields.io/badge/status-WIP-yellow)
-
 # Paper
 
 [AMD CDNA 2 Architecture](https://www.amd.com/content/dam/amd/en/documents/instinct-business-docs/white-papers/amd-cdna2-white-paper.pdf)
@@ -10,7 +8,17 @@ The `Summary and Relation to Inference` section is the main takeaway of this wri
 
 ## Summary and Relation to Inference
 
-Compute DNA (CDNA) is AMD's AI + HPC GPU architecture. AMD split their GPU architecture into Radeon DNA (RDNA) and CDNA because of the drastically different use cases for GPUs. CDNA focuses entirely on compute - there are no graphics pipelines or rasterization hardware. CDNA focuses completely on high-precision floating point, matrix cores specifically built for matrix multiplication operations used in AI workloads, advanced packaging technologies to combine heterogenous chiplets for domain-specific workloads, and Infinity Fabric (IF) — the high-bandwidth interconnect that binds the system together.
+GPUs were originally created to solve a highly parallel problem: draw a million pixels on the screen. That highly parallel problem created a computer architecture that was amenable to solving tasks in wildly different domains. As AMD and Nvidia realized that domains outside of computer graphics benefitted from this parallel GPU architecture, both companies moved to create separate hardware architectures for their consumer (graphics) and enterprise (AI + HPC) workloads.
+
+Compute DNA (CDNA) is AMD's AI + HPC GPU architecture and Radeon DNA (RDNA) is AMD's consumer architecture.
+
+With each generation of CDNA, the hardware of the chip is modified and improved to reflect the inherently different needs of these enterprise workloads. With CDNA 2, we see a few notable updates:
+
+- matrix cores work natively on bfloat16 (an important inference data type) and the ISA is expanded to allow kernels to use intrinsics to improve efficiency of register access during matmul ops.
+
+- Infinity Fabric allows cache coherency between heterogenous systems (CPU and GPU). This directly improves workloads which require frequent memory transfers between hosts and devices.
+
+- These new hardware capabilities are exposed to developers through AMD's ROCM ecosystem.
 
 ### Introduction
 
@@ -66,3 +74,11 @@ Additionally, bfloat16 (a specialized inference data type) matrix core workloads
 ### AMD CDNA 2 Packed FP32
 
 The ISA has been extended with the capability of doubling FP32 operations per clock cycle by performing two FP32 operations simultaneously. To enable this, the operands must be on adjacent registers.
+
+### AMD ROCm Open Software Platform Enables AMD CDNA 2
+
+The ROCm software platform is an open-source ecosystem which allows developers to write performant and portable kernel code. As these libraries are integrated into 3rd party applications, these applications will become more performant, faster, and more efficient when running on AMD hardware. 
+
+For example, when Pytorch wants to multiply a matrix, it relies on ROCm's `rocBLAS` library. `rocBLAS` has been updated to leverage the matrix core ISA available on CDNA 2, which means that a Pytorch developer is going to get their work done much faster than on CDNA 1.
+
+To enable our systems to run the workloads of the future, the CPUs and GPUs must be peers which share access to a set of computing resources. With CDNA 2, cache coherency between nodes offers a new paradigm... enabling workloads that were not previously possible while opening the door to a future of unrealized opportunities.
