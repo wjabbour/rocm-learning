@@ -5,6 +5,7 @@
 #define WORK_PER_THREAD 8
 
 __global__ void pairwise_reduction(int* in, int* out, int N) {
+    // we are launching a 1D grid of threads, so index of this thread in the x-dimension is its global id
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int i = tid * WORK_PER_THREAD;
 
