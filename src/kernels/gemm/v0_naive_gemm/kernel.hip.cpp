@@ -32,7 +32,7 @@
     the VMU attempts to coalesce these requests into as few requests as possible. It does this by using its knowledge of the platform's
     cache line size, and determining which memory addresses fit into that size.
 
-    If we were to tell a thread to load all of the data from a column of B, if N * lds_data_type_bytes > cache_line_size then every single
+    If we were to tell a thread to load all of the data from a column of B, if N * lds_data_type_bytes > cache_line_size (very likely) then every single
     data load would need a separate request to global memory. Our kernel would immediately become memory-bound.
 
     We solve this by breaking the problem into "tiles". We fetch TILE_SIZExTILE_SIZE tiles of data from A and B. This solves two problems with 
