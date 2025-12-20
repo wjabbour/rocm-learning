@@ -28,8 +28,8 @@
     Here you can see that as you traverse down a column, you are actually traversing N steps at a time (Here N is 2, 1 appears
     at index 0 and 3 appears at index 2). As N grows, the steps you take as you traverse the columns grows.
 
-    Tying this back to the hardware: when the threads of a wavefront request the contents of memory addresses from the Vector Memory Unit
-    it attempts to coalesce these requests into as few requests as possible. It does this by using its knowledge of the platform's
+    Tying this back to the hardware: when the threads of a wavefront request the contents of memory addresses from the Vector Memory Unit,
+    the VMU attempts to coalesce these requests into as few requests as possible. It does this by using its knowledge of the platform's
     cache line size, and determining which memory addresses fit into that size.
 
     If we were to tell a thread to load all of the data from a column of B, if N * lds_data_type_bytes > cache_line_size then every single
