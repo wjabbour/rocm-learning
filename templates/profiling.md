@@ -1,8 +1,9 @@
 # {Kernel Name}
 
-**GPU**: AMD Radeon RX 6700 XT  
-**CPU**: AMD Ryzen 5 5600X 6-Core Processor  
-**ROCm version**: 7.1  
+**GPU**: AMD Radeon RX 9070 XT 
+**CPU**: AMD Ryzen 7 9800X3D 8-Core Processor
+**Wavefront Size**: 32
+**ROCm version**: 7.1.0
 **Tools**: hipEvent, rocprofv3, sqlitebrowser  
 **OS**: Ubuntu 24.04.3 LTS
 
