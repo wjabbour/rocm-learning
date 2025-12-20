@@ -1,3 +1,10 @@
+## 12/19/2025 - CDNA 2 Writeup
+
+[source](papers/01_cdna2_architecture.md)
+
+Finally finished my writeup of the CDNA 2 white paper. This gave me some great historical context into CDNA
+and will be really valuable to compare to the modern iteration of CDNA.
+
 ## 12/18/2025 - Naive GEMM
 
 [source](src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp)
