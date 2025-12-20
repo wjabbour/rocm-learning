@@ -25,6 +25,12 @@ __global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int 
         input matrices A and B are given as 1D contiguous memory blocks stored in row-major order
     */
     for (int k = 0; k < K; k += TILE_SIZE) {
+        /*
+            as we iterate k across the shared dimension K, we walk horizontally along A and vertically along B
+
+            we hold the thread's global row constant and use k + tx to determine our column in A
+            we hold the thread's global col constant and use k + ty to determine our row in B
+        */
         int aCol = k + tx;
         int bRow = k + ty;
 
@@ -40,12 +46,20 @@ __global__ void matrix_multiply(float* A, float* B, float* C, int M, int N, int 
 
         // now that we've done the mental gymnastics to identify which piece of data to pull from A and B...
 
+        /*
+            we must load the data into LDS, but we need to be careful in the cases that our grid size, input size, and LDS size
+            don't share a common divisor.
+
+            For example, if we launch a 16x16 block, but A is a 1x2 matrix, then only 2 out of 256 threads will be able to read from A. 
+            We ensure that our thread is within the dimensions of A, and if not we pad LDS with 0s.
+        */
         if (row < M && aCol < K) {
             tile_A[ty][tx] = A[aIdx];
         } else {
             tile_A[ty][tx] = 0.0f;
         }
 
+        // same idea here, except the dimensions of B are KxN
         if (col < N && bRow < K) {
             tile_B[ty][tx] = B[bIdx];
         } else {
