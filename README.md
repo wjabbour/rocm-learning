@@ -7,7 +7,7 @@ This repository is my space to learn in public as I delve into GPU kernel engine
 There are three important directories:
 
 - [kernels](src/kernels) - I explore different kernels and include a write up of what I learned and how it relates to inference.
-- [papers](papers)  - I summarize and discuss different papers.
+- [papers](papers) - I summarize and discuss different papers.
 - [topics](topics) - I dive deep into some specific topic.
 
 My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU software stack, with a focus on high-performance inference.
@@ -17,7 +17,9 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 I’m currently studying [GEMM](src/kernels/gemm).
 
 I just finished working on a [Softmax kernel](src/kernels/reduction/v3_softmax/kernel.hip.cpp) which was a great
-introduction to the kernels at the heart of inference.
+introduction to the kernel at the heart of inference.
+
+[Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
 
 # Scheduled Learning
 
