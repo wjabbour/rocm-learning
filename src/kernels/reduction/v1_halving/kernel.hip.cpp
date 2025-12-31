@@ -3,9 +3,17 @@
 
 #define WORK_PER_THREAD 2
 
+#define HIP_CHECK(command) { \
+    hipError_t status = command; \
+    if (status != hipSuccess) { \
+        std::printf("Error: %s at line %d\n", hipGetErrorString(status), __LINE__); \
+        std::exit(1); \
+    } \
+}
+
 __global__ void pairwise_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
-    size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     /*
         with each kernel launch, we launch {current_value_of_n} / WORK_PER_THREAD threads
         since we are launching less threads than N, each thread needs to be responsible for 
@@ -22,8 +30,8 @@ __global__ void pairwise_reduction(int* in, int* out, size_t N) {
             once we know that we are on a thread that is within N, we need to find
             how many indices to the right (up to WORK_PER_THREAD) are also within N
 
-            we start at the rightmost index, walking left until we find that the index is
-            within N and use the inner loop to sum the indices
+            we start at the rightmost index (i + WORK_PER_THREAD), walking left until we find that the index is
+            within N and use the inner loop to sum the indices from there to i
         */
         for (int j = WORK_PER_THREAD - 1; j >= 0; j--) {
             if (i + j < N) {
@@ -74,8 +82,8 @@ int main() {
 
     printf("Populated input and output arrays\n");
 
-    hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
-    hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice);
+    HIP_CHECK(hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice));
     
     size_t currentN = N;
 
@@ -110,6 +118,7 @@ int main() {
             out_d,
             currentN
         );
+        HIP_CHECK(hipGetLastError());
 
         hipEventRecord(k_stop, 0);
         hipEventSynchronize(k_stop);
