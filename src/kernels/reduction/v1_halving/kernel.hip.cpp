@@ -54,17 +54,20 @@ int main() {
     hipEventRecord(sys_start, 0);
 
     size_t N = 1ULL << 31;
-    size_t size = N * sizeof(int);
+    size_t inputBytes = N * sizeof(int);
 
+    // the output buffer is smaller than N since we aggregate the data in the kernel
+    size_t outputElements = (N + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
+    size_t outputBytes = outputElements * sizeof(int);
     int *in_d, *out_d;
 
-    int *in_h = (int*)malloc(size);
+    int *in_h = (int*)malloc(inputBytes);
     if (in_h == NULL) {
         printf("Input array host memory allocation failed\n");
         exit(1);
     }
 
-    int *out_h = (int*)malloc(size);
+    int* out_h = (int*)calloc(outputElements, sizeof(int));
     if (out_h == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
@@ -72,19 +75,20 @@ int main() {
 
     printf("Allocated input and output arrays\n");
 
-    hipMalloc(&in_d, size);
-    hipMalloc(&out_d, size);
+    HIP_CHECK(hipMalloc(&in_d, inputBytes));
+    HIP_CHECK(hipMalloc(&out_d, outputBytes));
+
+    printf("Allocated device arrays\n");
 
     for (size_t i = 0; i < N; i++) {
         in_h[i] = Utils::Random::int_in_range(1, 10);
-        out_h[i] = 0;
     }
 
     printf("Populated input and output arrays\n");
 
-    HIP_CHECK(hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice));
-    
+    HIP_CHECK(hipMemcpy(in_d, in_h, inputBytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(out_d, out_h, outputBytes, hipMemcpyHostToDevice));
+
     size_t currentN = N;
 
     hipEvent_t k_start, k_stop;
