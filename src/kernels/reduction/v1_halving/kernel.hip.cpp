@@ -97,7 +97,7 @@ int main() {
             0,
             in_d,
             out_d,
-            outputSize
+            currentN
         );
 
         hipEventRecord(k_stop, 0);

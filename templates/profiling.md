@@ -9,7 +9,7 @@
 
 ## Baseline Implementation
 
-## Performance Summary
+### Performance Summary
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N   | Kernel Speedup vs v1 | System Speedup vs v1 |
 | -------------- | ---------------- | ---------------- | --- | -------------------- | -------------------- |
