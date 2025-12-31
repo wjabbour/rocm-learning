@@ -46,7 +46,7 @@ int main() {
 
     hipEventRecord(sys_start, 0); 
 
-    int N = 1 << 30;
+    size_t N = 1ULL << 31;
     size_t size = N * sizeof(int);
 
     int blockSize = 64;
@@ -59,15 +59,15 @@ int main() {
     hipMalloc(&in_d, size);
     hipMalloc(&out_d, size);
 
-    for (int i = 0; i < N; i++) {
+    for (size_t i = 0; i < N; i++) {
         in_h[i] = Utils::Random::int_in_range(1, 5);
         out_h[i] = 0;
     }
 
     hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
     hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice);
-
-    int currentN = N;
+    
+    size_t currentN = N;
 
     hipEvent_t k_start, k_stop;
     hipEventCreate(&k_start);

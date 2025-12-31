@@ -9,11 +9,11 @@
 
 ## Baseline Implementation
 
-## Performance Summary
+### Performance Summary
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
-| **v1**         | 50,518           | 8,298            | 2^30 | -                    | -                    |
+| **v1**         | 21,608           | 3,824            | 2^30 | -                    | -                    |
 
 ### Description
 
@@ -54,18 +54,16 @@ Let's increase the per-thread workload. Instead of reducing two elements per thr
 
 ## Second Implementation
 
-## Performance Summary
+### Performance Summary
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
-| **v1**         | 50,518           | 8,298            | 2^30 | -                    | -                    |
-| **v2**         | 20,969           | 8,151            | 2^30 | 2.4x faster          | 1.01x faster         |
+| **v1**         | 21,608           | 3,824            | 2^30 | -                    | -                    |
+| **v2**         | 9,390            | 3,839            | 2^30 | 2.3x faster          | 1.01x slower         |
 
 ### Description
 
-- 1
-- 2
-- 3
+Instead of each thread adding two elements, each thread is now responsible for adding eight elements.
 
 ### Profiling Observations
 
