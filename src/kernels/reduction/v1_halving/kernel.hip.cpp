@@ -54,8 +54,16 @@ int main() {
     int *in_d, *out_d;
 
     int *in_h = (int*)malloc(size);
-    int *out_h = (int*)malloc(size);
+    if (in_h == NULL) {
+        printf("Input array host memory allocation failed\n");
+        exit(1);
+    }
 
+    int *out_h = (int*)malloc(size);
+    if (in_h == NULL) {
+        printf("Output array host memory allocation failed\n");
+        exit(1);
+    }
     hipMalloc(&in_d, size);
     hipMalloc(&out_d, size);
 
@@ -63,6 +71,8 @@ int main() {
         in_h[i] = Utils::Random::int_in_range(1, 5);
         out_h[i] = 0;
     }
+
+    std::cout << "Populated input and output arrays\n";
 
     hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
     hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice);
