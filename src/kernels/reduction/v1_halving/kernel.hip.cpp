@@ -2,9 +2,9 @@
 #include <iostream>
 #include "utils/random_int.hpp"
 
-#define WORK_PER_THREAD 8
+#define WORK_PER_THREAD 2
 
-__global__ void pairwise_reduction(int* in, int* out, int N) {
+__global__ void pairwise_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     /*
@@ -46,10 +46,8 @@ int main() {
 
     hipEventRecord(sys_start, 0); 
 
-    size_t N = 1ULL << 31;
+    size_t N = 5;
     size_t size = N * sizeof(int);
-
-    int blockSize = 64;
 
     int *in_d, *out_d;
 
@@ -85,8 +83,8 @@ int main() {
 
     float kernel_total_μs = 0.0f;
 
+    int blockSize = 64;
     while (currentN > 1) {
-        // lazily, launching too many threads. I only need currentN / 4
         int outputSize = (currentN + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
         int blockCount = (outputSize + blockSize - 1) / blockSize;
 
@@ -100,7 +98,7 @@ int main() {
             0,
             in_d,
             out_d,
-            currentN
+            outputSize
         );
 
         hipEventRecord(k_stop, 0);
