@@ -43,9 +43,9 @@ int main() {
     hipEventCreate(&sys_start);
     hipEventCreate(&sys_stop);
 
-    hipEventRecord(sys_start, 0); 
+    hipEventRecord(sys_start, 0);
 
-    size_t N = 1ULL << 30;
+    size_t N = 1ULL << 31;
     size_t size = N * sizeof(int);
 
     int *in_d, *out_d;
@@ -86,9 +86,17 @@ int main() {
     float kernel_total_μs = 0.0f;
 
     int blockSize = 64;
+    hipDeviceProp_t prop;
+    hipGetDeviceProperties(&prop, 0);
+
     while (currentN > 1) {
         int outputSize = (currentN + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
         int blockCount = (outputSize + blockSize - 1) / blockSize;
+
+        if (size_t(blockCount * blockSize) > (size_t)prop.maxGridSize[0]) {
+            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", blockCount, prop.maxGridSize[0]);
+            exit(1);
+        }
 
         hipEventRecord(k_start, 0);
 
