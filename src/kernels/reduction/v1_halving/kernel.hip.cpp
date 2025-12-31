@@ -5,13 +5,13 @@
 
 __global__ void pairwise_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     /*
         with each kernel launch, we launch {current_value_of_n} / WORK_PER_THREAD threads
         since we are launching less threads than N, each thread needs to be responsible for 
         summing WORK_PER_THREAD units of N
     */
-    int i = tid * WORK_PER_THREAD;
+    size_t i = tid * WORK_PER_THREAD;
 
     /*
         our thread must be within N, else we will pull garbage data
