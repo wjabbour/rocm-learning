@@ -29,13 +29,13 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
 
 - The "Power Wall"
 
-As you increase the frequency (clock rate) of a computing chip, the power consumption and heat dissipation of the chip increases polynomially. We cannot increase DIMM bandwidth by simply making it transfer data more frequently because it would get too hot and require too much power.
+  As you increase the frequency (clock rate) of a computing chip, the power consumption and heat dissipation of the chip increases polynomially. We cannot increase DIMM bandwidth by simply making it transfer data more frequently because it would get too hot and require too much power.
 
 - Signal Integrity
 
-As you increase the frequency of an electrical signal, the copper trace begins to function as an antenna. The back-and-forth of electrons in the physical medium produces electromagnetic waves which interfere with neighboring traces carrying data. This effect is called crosstalk.
+  As you increase the frequency of an electrical signal, the copper trace begins to function as an antenna. The back-and-forth of electrons in the physical medium produces electromagnetic waves which interfere with neighboring traces carrying data. This effect is called crosstalk.
 
-The core issue is that DIMMs are designed to move relatively small amounts of data at a reasonably high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
+  The core issue is that DIMMs are designed to move relatively small amounts of data at a reasonably high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
 
 ## A New Hope
 
