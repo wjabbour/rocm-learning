@@ -1,5 +1,4 @@
 #include <hip/hip_runtime.h>
-#include <iostream>
 #include "utils/random_int.hpp"
 
 #define WORK_PER_THREAD 2
@@ -66,11 +65,11 @@ int main() {
     hipMalloc(&out_d, size);
 
     for (size_t i = 0; i < N; i++) {
-        in_h[i] = Utils::Random::int_in_range(1, 5);
+        in_h[i] = 1;
         out_h[i] = 0;
     }
 
-    std::cout << "Populated input and output arrays\n";
+    printf("Populated input and output arrays\n");
 
     hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
     hipMemcpy(out_d, out_h, size, hipMemcpyHostToDevice);
@@ -129,7 +128,7 @@ int main() {
     hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost);
 
     // the answer!
-    std::cout << out_h[0] << "\n";
+    printf("Result: %i\n", out_h[0]);
 
     hipFree(in_d);
     hipFree(out_d);
@@ -142,8 +141,8 @@ int main() {
     float sys_ms = 0.0f;
     hipEventElapsedTime(&sys_ms, sys_start, sys_stop);
 
-    std::cout << "Kernel-only time = " << kernel_total_μs * 1000 << " μs\n";
-    std::cout << "System time (host+device) = " << sys_ms << " ms\n";
+    printf("Kernel-only time = %f μs\n", kernel_total_μs * 1000);
+    printf("System time (host+device) = %f ms\n", sys_ms);
 
     return 0;
 }
