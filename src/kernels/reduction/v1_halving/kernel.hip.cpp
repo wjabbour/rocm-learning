@@ -45,7 +45,7 @@ int main() {
 
     hipEventRecord(sys_start, 0); 
 
-    size_t N = 5;
+    size_t N = 1ULL << 30;
     size_t size = N * sizeof(int);
 
     int *in_d, *out_d;
@@ -61,11 +61,14 @@ int main() {
         printf("Output array host memory allocation failed\n");
         exit(1);
     }
+
+    printf("Allocated input and output arrays\n");
+
     hipMalloc(&in_d, size);
     hipMalloc(&out_d, size);
 
     for (size_t i = 0; i < N; i++) {
-        in_h[i] = 1;
+        in_h[i] = Utils::Random::int_in_range(1, 10);
         out_h[i] = 0;
     }
 
