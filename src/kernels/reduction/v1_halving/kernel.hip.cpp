@@ -57,7 +57,7 @@ int main() {
     }
 
     int *out_h = (int*)malloc(size);
-    if (in_h == NULL) {
+    if (out_h == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
     }
