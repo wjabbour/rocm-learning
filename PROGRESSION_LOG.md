@@ -1,3 +1,9 @@
+## 12/31/2025 - Halving Kernel Profiling Writeup
+
+[source](src/kernels/reduction/v1_halving/profiling.md)
+
+Finally put the finishing touches on my profiling writeup and was able to utilize 83% of the cards theoretical throughput!
+
 ## 12/19/2025 - CDNA 2 Writeup
 
 [source](papers/01_cdna2_architecture.md)
