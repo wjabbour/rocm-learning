@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 #include "utils/random_int.hpp"
 
-#define WORK_PER_THREAD 2
+#define WORK_PER_THREAD 8
 
 #define HIP_CHECK(command) { \
     hipError_t status = command; \

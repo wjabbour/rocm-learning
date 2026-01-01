@@ -1,6 +1,6 @@
 # {Kernel Name}
 
-**GPU**: AMD Radeon RX 9070 XT 
+**GPU**: AMD Radeon RX 9070 XT
 **CPU**: AMD Ryzen 7 9800X3D 8-Core Processor
 **Wavefront Size**: 32
 **ROCm version**: 7.1.0
@@ -11,8 +11,8 @@
 
 ### Performance Summary
 
-| Implementation | Kernel Time (μs) | System Time (ms) | N   | Kernel Speedup vs v1 | System Speedup vs v1 |
-| -------------- | ---------------- | ---------------- | --- | -------------------- | -------------------- |
+| Implementation | Kernel Time (μs) | System Time (ms) | N   | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
+| -------------- | ---------------- | ---------------- | --- | -------------------- | -------------------- | ------------------------ |
 | **v1**         | 1                | 1                | 100 | -                    | -                    |
 
 ### Description

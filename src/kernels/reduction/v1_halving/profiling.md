@@ -4,16 +4,16 @@
 **CPU**: AMD Ryzen 7 9800X3D 8-Core Processor  
 **Wavefront Size**: 32  
 **ROCm version**: 7.1.0  
-**Tools**: hipEvent, rocprofv3, sqlitebrowser    
-**OS**: Ubuntu 24.04.3 LTS  
+**Tools**: hipEvent, rocprofv3, sqlitebrowser  
+**OS**: Ubuntu 24.04.3 LTS
 
 ## Baseline Implementation
 
 ### Performance Summary
 
-| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
-| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
-| **v1**         | 21,608           | 3,824            | 2^30 | -                    | -                    |
+| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
+| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
 
 ### Description
 
@@ -46,7 +46,7 @@ Here are the same counters for the final kernel launches:
 
 ### Suggested Improvements
 
-Let's increase the per-thread workload. Instead of reducing two elements per thread, let's have each thread compute four elements. My hypothesis:
+We need to increase the per-thread workload. Let's make that a configurable value, increase it, and see what happens.
 
 - N shrinks more aggressively - fewer reduction passes
 - Fewer small-N kernel launches where runtime is dominated by fixed launch overhead.
@@ -56,27 +56,46 @@ Let's increase the per-thread workload. Instead of reducing two elements per thr
 
 ### Performance Summary
 
-| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 |
-| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- |
-| **v1**         | 21,608           | 3,824            | 2^30 | -                    | -                    |
-| **v2**         | 9,390            | 3,839            | 2^30 | 2.3x faster          | 1.01x slower         |
+| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
+| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
+| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 83%                      |
 
 ### Description
 
-Instead of each thread adding two elements, each thread is now responsible for adding eight elements.
+Instead of each thread adding two elements, each thread is now responsible for adding eight elements. With this increase in per-thread work, the kernel needs to spend more time computing. This allows the scheduler to hide the latency of the memory transactions. With this change, the kernel runtime halved and the effective throughput of the kernel is approaching the theoretical limit.
 
 ### Profiling Observations
 
-- 1
-- 2
-- 3
-
-### Diagnosis
-
-- 1
-- 2
-- 3
+Unfortunately, I recently upgraded to an RDNA 4 card. This card does not have support for the PMCs I need to profile the kernel in-depth. However, as expected I can see that the number of kernel launches dropped by a factor of 8 which contributes to the decreased runtime.
 
 ### Suggested Improvements
 
-{description}
+There are two primary improvements I can identify:
+
+1. Vectorized Loads - the kernel is using scalar load instructions, loading individual `int`s from memory at a time. Since we know that in most cases we wish to load multiple `int`s at once, let's try using the `int4` data type to fetch 128 bits at a time. This will reduce the load on the instruction pipeline and increase performance.
+2. Memory Bandwidth - the kernel is performing an excess number of memory writes (and subsequently reads) because the aggregation does not shrink N aggressively enough. We need to use LDS and coordinate all of the wavefronts in a block to aggregate to a single value. Now, each kernel pass will decrease N by a factor of threadsPerBlock.
+
+Since #2 is a different paradigm, I will perform that work in the [block-level kernel reduction](../v2_block_level/kernel.hip.cpp).
+
+## Third Implementation
+
+### Performance Summary
+
+| Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
+| -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
+| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 83%                      |
+| **v3**         | 18,428           | 6,962            | 2^31 | 0.0x faster          | 0.0x faster          | 83%                      |
+
+### Description
+
+I implemented vectorized loads in the kernel. 
+
+### Profiling Observations
+
+The runtime was not substantially different. The memory system must be smart enough to detect my sequential load pattern and optimized my code.
+
+### Suggested Improvements
+
+Let's move forward with the [block-level reduction](../v2_block_level/kernel.hip.cpp). 
