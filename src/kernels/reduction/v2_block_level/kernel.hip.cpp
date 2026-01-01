@@ -1,15 +1,8 @@
 #include <hip/hip_runtime.h>
 #include "utils/random_int.hpp"
+#include "utils/hip_check.hpp"
 
 #define WORK_PER_THREAD 8
-
-#define HIP_CHECK(command) { \
-    hipError_t status = command; \
-    if (status != hipSuccess) { \
-        std::printf("Error: %s at line %d\n", hipGetErrorString(status), __LINE__); \
-        std::exit(1); \
-    } \
-}
 
 __global__ void pairwise_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
@@ -122,7 +115,7 @@ int main() {
             out_d,
             currentN
         );
-        HIP_CHECK(hipGetLastError());
+        HIP_KERNEL_CHECK();
 
         hipEventRecord(k_stop, 0);
         hipEventSynchronize(k_stop);
