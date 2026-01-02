@@ -1,0 +1,1 @@
+pmc: SQ_INST_CYCLES_VMEM
