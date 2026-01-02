@@ -1,2 +1,0 @@
-# Raw Memory Read Requests (L2 Cache)
-pmc: SQ_INST_CYCLES_VMEM

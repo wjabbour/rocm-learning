@@ -3,3 +3,5 @@ a.out
 # rocprof output
 turner-G760/
 .rocprofv3
+
+profiler_config.txt
