@@ -4,7 +4,7 @@
 
 #define WORK_PER_THREAD 8
 
-__global__ void pairwise_reduction(int* in, int* out, size_t N) {
+__global__ void halving_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     /*
@@ -106,7 +106,7 @@ int main() {
         hipEventRecord(k_start, 0);
 
         hipLaunchKernelGGL(
-            pairwise_reduction,
+            halving_reduction,
             dim3(blockCount),
             dim3(blockSize), 
             0,
