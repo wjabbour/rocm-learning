@@ -94,7 +94,7 @@ I implemented vectorized loads in the kernel.
 
 ### Profiling Observations
 
-The runtime was not substantially different. The memory system must be smart enough to detect my sequential load pattern and optimized my code.
+The runtime was not substantially different. Either the memory system or the compiler must be smart enough to detect my sequential load pattern and optimize it. I could potentially confirm this by trying to extract the assembly from the compiled binary and examining the instructions that were ultimately fed to the compute units.
 
 ### Suggested Improvements
 

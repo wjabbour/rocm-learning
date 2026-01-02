@@ -1,6 +1,6 @@
 # About Me
 
-Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node.js and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
+Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
 This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
@@ -14,9 +14,9 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 
 # Currently Working On
 
-I’m currently re-visiting my previous kernels, profiling them, and creating profiling writeups - starting with my [halving reduction](src/kernels/reduction/v1_halving/profiling.md).
+I’m currently re-visiting my previous kernels, profiling them, and creating profiling writeups - currently working on my [block-level reduction](src/kernels/reduction/v2_block_level/kernel.hip.cpp).
 
-I just finished working on a [simple GEMM kernel](src/kernels/gemm).
+I just finished the writeup for my [halving reduction](src/kernels/reduction/v1_halving/profiling.md).
 
 [Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
 
