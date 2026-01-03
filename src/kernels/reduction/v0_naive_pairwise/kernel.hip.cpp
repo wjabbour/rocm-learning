@@ -23,33 +23,34 @@ __global__ void add_kernel(int* A, int* B, int* C, int N) {
 
 int main() {
     const int N = 1 << 20;
-    size_t size = N * sizeof(int);
+    size_t bytes = N * sizeof(int);
 
-    int blockSize = 256;
-    int blockCount = (N + blockSize - 1) / blockSize;
+    // allocate host memory
+    int *A_h = (int*)malloc(bytes);
+    int *B_h = (int*)malloc(bytes);
+    int *C_h = (int*)malloc(bytes);
 
+    // allocate device memory
     int *A_d, *B_d, *C_d;
-
-    int *A_h = (int*)malloc(size);
-    int *B_h = (int*)malloc(size);
-    int *C_h = (int*)malloc(size);
-
-    hipMalloc(&A_d, size);
-    hipMalloc(&B_d, size);
-    hipMalloc(&C_d, size);
+    hipMalloc(&A_d, bytes);
+    hipMalloc(&B_d, bytes);
+    hipMalloc(&C_d, bytes);
 
     for (int i = 0; i < N; i++) {
         A_h[i] = i;
         B_h[i] = i*2;
     }
 
-    hipMemcpy(A_d, A_h, size, hipMemcpyHostToDevice);
-    hipMemcpy(B_d, B_h, size, hipMemcpyHostToDevice);
+    hipMemcpy(A_d, A_h, bytes, hipMemcpyHostToDevice);
+    hipMemcpy(B_d, B_h, bytes, hipMemcpyHostToDevice);
+
+    int blockSize = 256;
+    int blockCount = (N + blockSize - 1) / blockSize;
 
     hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, N);
     hipDeviceSynchronize();
 
-    hipMemcpy(C_h, C_d, size, hipMemcpyDeviceToHost);
+    hipMemcpy(C_h, C_d, bytes, hipMemcpyDeviceToHost);
 
     for (int i = 0; i < N; i++) {
         std::cout << C_h[i] << "\n";
