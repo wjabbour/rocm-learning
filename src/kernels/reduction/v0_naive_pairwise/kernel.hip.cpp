@@ -34,7 +34,7 @@ int main() {
     int *A_d, *B_d, *C_d;
     hipMalloc(&A_d, bytes);
     hipMalloc(&B_d, bytes);
-    hipMalloc(&C_d, bytes);
+    // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
 
     for (int i = 0; i < N; i++) {
         A_h[i] = i;

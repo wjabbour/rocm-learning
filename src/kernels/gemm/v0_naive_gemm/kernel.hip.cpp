@@ -155,7 +155,7 @@ int main() {
     // host -> device transfer
     hipMemcpy(A_d, A_h.data(), bytesA, hipMemcpyHostToDevice);
     hipMemcpy(B_d, B_h.data(), bytesB, hipMemcpyHostToDevice);
-    // we dont need to copy C to the device because we are going to overwrite it
+    // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
 
     /*
         with this implementation, each thread in the block collaboritvely loads a piece of data
