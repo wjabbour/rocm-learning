@@ -1,0 +1,5 @@
+- add thorough comments to all existing kernels
+- update kernel code so that all existing kernels look similar and abstract common code to shared utils
+- add profiling writeups to all existing kernels
+- Finish HBM writeup
+- read attention is all you need
