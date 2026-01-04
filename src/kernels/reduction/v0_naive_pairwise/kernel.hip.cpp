@@ -17,7 +17,7 @@
 __global__ void add_kernel(int* A, int* B, int* C, int N) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (idx > N) return;
+    if (idx >= N) return;
 
     C[idx] = A[idx] + B[idx];
 }
