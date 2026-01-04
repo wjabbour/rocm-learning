@@ -34,6 +34,11 @@ __global__ void add_kernel(int* A, int* B, int* C, int N) {
 }
 
 int main() {
+    hipEvent_t sys_start, sys_stop;
+    HIP_CHECK(hipEventCreate(&sys_start));
+    HIP_CHECK(hipEventCreate(&sys_stop));
+
+    HIP_CHECK(hipEventRecord(sys_start, 0));
     const int N = 1 << 20;
     size_t bytes = N * sizeof(int);
 
@@ -58,11 +63,25 @@ int main() {
     HIP_CHECK(hipMemcpy(B_d, B_h.data(), bytes, hipMemcpyHostToDevice));
     // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
 
+    hipEvent_t k_start, k_stop;
+    HIP_CHECK(hipEventCreate(&k_start));
+    HIP_CHECK(hipEventCreate(&k_stop));
+
+    float kernel_total_μs = 0.0f;
+
     int blockSize = 256;
     int blockCount = (N + blockSize - 1) / blockSize;
 
+    HIP_CHECK(hipEventRecord(k_start, 0));
     hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, N);
     HIP_KERNEL_CHECK();
+    HIP_CHECK(hipEventRecord(k_stop, 0));
+
+    HIP_CHECK(hipEventSynchronize(k_stop));
+
+    float k_μs = 0.0f;
+    HIP_CHECK(hipEventElapsedTime(&k_μs , k_start, k_stop));
+    kernel_total_μs += k_μs;
     HIP_CHECK(hipDeviceSynchronize());
 
     HIP_CHECK(hipMemcpy(C_h.data(), C_d, bytes, hipMemcpyDeviceToHost));
@@ -79,6 +98,15 @@ int main() {
     } else {
         printf("Input processed incorrectly\n");
     }
+
+    HIP_CHECK(hipEventRecord(sys_stop, 0));
+    HIP_CHECK(hipEventSynchronize(sys_stop));
+
+    float sys_ms = 0.0f;
+    HIP_CHECK(hipEventElapsedTime(&sys_ms, sys_start, sys_stop));
+
+    printf("Kernel-only time = %f μs\n", kernel_total_μs * 1000);
+    printf("System time (host+device) = %f ms\n", sys_ms);
 
     return 0;
 }

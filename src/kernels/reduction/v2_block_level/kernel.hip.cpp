@@ -41,10 +41,10 @@ __global__ void block_reduction(int* in, int* out, size_t N) {
 
 int main() {
     hipEvent_t sys_start, sys_stop;
-    hipEventCreate(&sys_start);
-    hipEventCreate(&sys_stop);
+    HIP_CHECK(hipEventCreate(&sys_start));
+    HIP_CHECK(hipEventCreate(&sys_stop));
 
-    hipEventRecord(sys_start, 0);
+    HIP_CHECK(hipEventRecord(sys_start, 0));
 
     size_t N = 1ULL << 31;
     size_t inputBytes = N * sizeof(int);
@@ -85,8 +85,8 @@ int main() {
     size_t currentN = N;
 
     hipEvent_t k_start, k_stop;
-    hipEventCreate(&k_start);
-    hipEventCreate(&k_stop);
+    HIP_CHECK(hipEventCreate(&k_start));
+    HIP_CHECK(hipEventCreate(&k_stop));
 
     float kernel_total_μs = 0.0f;
 
@@ -103,7 +103,7 @@ int main() {
             exit(1);
         }
 
-        hipEventRecord(k_start, 0);
+        HIP_CHECK(hipEventRecord(k_start, 0));
 
         hipLaunchKernelGGL(
             block_reduction,
@@ -117,14 +117,14 @@ int main() {
         );
         HIP_KERNEL_CHECK();
 
-        hipEventRecord(k_stop, 0);
-        hipEventSynchronize(k_stop);
+        HIP_CHECK(hipEventRecord(k_stop, 0));
+        HIP_CHECK(hipEventSynchronize(k_stop));
 
         float k_μs = 0.0f;
-        hipEventElapsedTime(&k_μs , k_start, k_stop);
+        HIP_CHECK(hipEventElapsedTime(&k_μs , k_start, k_stop));
         kernel_total_μs += k_μs;
 
-        hipDeviceSynchronize();
+        HIP_CHECK(hipDeviceSynchronize());
 
         /*
             ping pong buffering
@@ -152,11 +152,11 @@ int main() {
     free(in_h);
     free(out_h);
 
-    hipEventRecord(sys_stop, 0);
-    hipEventSynchronize(sys_stop);
+    HIP_CHECK(hipEventRecord(sys_stop, 0));
+    HIP_CHECK(hipEventSynchronize(sys_stop));
 
     float sys_ms = 0.0f;
-    hipEventElapsedTime(&sys_ms, sys_start, sys_stop);
+    HIP_CHECK(hipEventElapsedTime(&sys_ms, sys_start, sys_stop));
 
     printf("Kernel-only time = %f μs\n", kernel_total_μs * 1000);
     printf("System time (host+device) = %f ms\n", sys_ms);
