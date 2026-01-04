@@ -2,42 +2,62 @@
 # ROCm Inference Study - Build System
 # ==========================================
 
-# Compiler: hipcc is the AMD wrapper that handles mixing C++ and Device code
+# Compiler
 CXX := hipcc
 
+# -------------------------------------------------------------------------
+# Dynamic Source Selection
+# -------------------------------------------------------------------------
+# Default Source: The kernel used if you just type 'make' or 'make run'
+# You can override this via command line: make run SRC=src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp
+SRC ?= src/kernels/reduction/v0_naive_pairwise/kernel.hip.cpp
+
+# Output Handling
+# 1. Strip directory path (src/kernels/.../kernel.hip.cpp -> kernel.hip.cpp)
+# 2. Strip extension (kernel.hip.cpp -> kernel.hip)
+# 3. Save binary to a 'build' folder so root dir stays clean
+BUILD_DIR := build
+TARGET_NAME := $(basename $(notdir $(SRC)))
+TARGET := $(BUILD_DIR)/$(TARGET_NAME)
+
+# -------------------------------------------------------------------------
 # Compilation Flags
-# -O3:        Maximize optimization (aggressive loop unrolling, inlining)
-# -std=c++17: Modern C++ features (structured bindings, etc.)
-# -Wall:      Enable all warnings (catch bugs early)
-CXXFLAGS := -O3 -std=c++17 -Wall -Wextra -I. -Isrc
+# -------------------------------------------------------------------------
+# -Isrc  : Look for headers in src/ (Handles src/utils/...)
+CXXFLAGS := -O3 -std=c++17 -Wall -Wextra -Isrc
 
 # Target Architecture
-# "native" tells hipcc to query the GPU and compile specifically for its GFX version.
-# This ensures the latest RDNA instruction sets available to the hardware are used
+# "native" tells hipcc to query the GPU and compile specifically for its GFX version
 ARCH_FLAGS := --offload-arch=native
 
-# Project Files
-TARGET := kernel
-SRC := src/kernels/reduction/v0_naive_pairwise/kernel.hip.cpp
-# List headers here so Make knows to re-compile
-HEADERS := src/utils/hip_check.hpp src/utils/random_int.hpp
+# Headers (Global dependency check)
+# Automatically detects ANY header change in src/utils/
+HEADERS := $(wildcard src/utils/*.hpp)
+
+# -------------------------------------------------------------------------
+# Rules
+# -------------------------------------------------------------------------
 
 # Default Target
 all: $(TARGET)
 
 # Build Rule
 $(TARGET): $(SRC) $(HEADERS)
-	@echo "Building for generic host + specific device architecture..."
+	@mkdir -p $(BUILD_DIR)
+	@echo "------------------------------------------------"
+	@echo "Compiling: $(SRC)"
+	@echo "Output:    $(TARGET)"
+	@echo "Arch Flag: $(ARCH_FLAGS)"
+	@echo "------------------------------------------------"
 	$(CXX) $(CXXFLAGS) $(ARCH_FLAGS) $(SRC) -o $(TARGET)
-	@echo "Build complete: ./$(TARGET)"
 
-# Clean Rule
-clean:
-	rm -f $(TARGET)
-
-# Execution Rule (Convenience)
+# Execution Rule
 run: $(TARGET)
-	./$(TARGET)
+	@echo "Running $(TARGET)..."
+	@./$(TARGET)
 
-# Phony targets prevent confusion with files named "clean" or "run"
+# Clean Rule (Removes the entire build directory)
+clean:
+	rm -rf $(BUILD_DIR)
+
 .PHONY: all clean run
