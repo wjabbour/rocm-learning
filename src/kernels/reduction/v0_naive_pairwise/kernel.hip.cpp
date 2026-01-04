@@ -73,6 +73,8 @@ int main() {
     int blockCount = (N + blockSize - 1) / blockSize;
 
     HIP_CHECK(hipEventRecord(k_start, 0));
+
+    // launch kernel
     hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, N);
     HIP_KERNEL_CHECK();
     HIP_CHECK(hipEventRecord(k_stop, 0));
@@ -84,6 +86,7 @@ int main() {
     kernel_total_ms += k_μs;
     HIP_CHECK(hipDeviceSynchronize());
 
+    // device -> host transfer
     HIP_CHECK(hipMemcpy(C_h.data(), C_d, bytes, hipMemcpyDeviceToHost));
 
     // free device memory immediately, verify after

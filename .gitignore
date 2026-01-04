@@ -4,4 +4,8 @@ a.out
 turner-G760/
 .rocprofv3
 
+# my rocprofv3 config file
 profiler_config.txt
+
+# compilation output
+kernel

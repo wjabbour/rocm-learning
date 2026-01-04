@@ -1,6 +1,5 @@
 - add thorough comments to all existing kernels
 - update kernel code so that all existing kernels look similar and abstract common code to shared utils
-- create makefile
 - better define the bandwidth efficiency metric i use in profiling
 - add profiling writeups to all existing kernels
 - Finish HBM writeup
