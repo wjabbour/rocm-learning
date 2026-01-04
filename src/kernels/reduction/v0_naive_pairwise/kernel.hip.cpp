@@ -2,6 +2,16 @@
 #include <iostream>
 #include "utils/random_int.hpp"
 
+// helper function to verify the result of the kernel
+bool verify_result(const std::vector<int>& A_h, const std::vector<int>& B_h, const std::vector<int>& C_h, int N) {
+    for (int i = 0; i < N; i++) {
+        if (C_h[i] != A_h[i] + B_h[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 /*
     My very first kernel
 
@@ -42,6 +52,7 @@ int main() {
         B_h[i] = Utils::Random::int_in_range(1, 10);
     }
 
+    // host -> device transfer
     hipMemcpy(A_d, A_h.data(), bytes, hipMemcpyHostToDevice);
     hipMemcpy(B_d, B_h.data(), bytes, hipMemcpyHostToDevice);
     // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
@@ -54,15 +65,17 @@ int main() {
 
     hipMemcpy(C_h.data(), C_d, bytes, hipMemcpyDeviceToHost);
 
-    for (int i = 0; i < N; i++) {
-        std::cout << C_h[i] << "\n";
-    }
-
     hipFree(A_d);
     hipFree(B_d);
     hipFree(C_d);
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
+
+    if (verify_result(A_h, B_h, C_h, N)) {
+        printf("Input processed correctly\n");
+    } else {
+        printf("Input processed incorrectly\n");
+    }
 
     return 0;
 }
