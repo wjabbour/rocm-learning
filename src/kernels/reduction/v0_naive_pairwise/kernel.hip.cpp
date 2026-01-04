@@ -93,12 +93,6 @@ int main() {
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
 
-    if (verify_result(A_h, B_h, C_h, N)) {
-        printf("Input processed correctly\n");
-    } else {
-        printf("Input processed incorrectly\n");
-    }
-
     HIP_CHECK(hipEventRecord(sys_stop, 0));
     HIP_CHECK(hipEventSynchronize(sys_stop));
 
@@ -107,6 +101,12 @@ int main() {
 
     printf("Kernel-only time = %f μs\n", kernel_total_ms * 1000);
     printf("System time (host+device) = %f ms\n", sys_ms);
+
+    if (verify_result(A_h, B_h, C_h, N)) {
+        printf("Input processed correctly\n");
+    } else {
+        printf("Input processed incorrectly\n");
+    }
 
     return 0;
 }
