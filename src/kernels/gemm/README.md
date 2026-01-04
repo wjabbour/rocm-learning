@@ -2,6 +2,12 @@
 
 General Matrix Multiply (GEMM) kernels are a core piece of training and inference pipelines. A GEMM kernel is responsible for efficiently multiplying two matrices together to produce an output matrix.
 
+## Build Instructions
+
+```bash
+make clean && make run SRC=src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp
+```
+
 # Learnings
 
 - When requesting data from the memory system (L1, L2, HBM) it is important to ensure that the threads of a wavefront request contiguous data so that the memory controller can coalesce the requests from each thread into as few transactions as possible.
@@ -12,7 +18,7 @@ It's important to note that a motivation for this design is the fact that GPU me
 
 When requesting data from LDS, it is important to ensure that the threads of a wavefront either:
 
-1) all request from the same bank. This executes a special hardware-enabled operation which broadcasts the value of that memory address to all lanes in the SIMD.
+1) all request the same memory address. This executes a special hardware-enabled operation which broadcasts the value of that memory address to all lanes in the SIMD.
 2) all request from a distinct bank, i.e. two threads do not attempt to access the same LDS bank within the same clock cycle.
 
 If either of these rules are violated, the bank access between the N colliding threads will be serialized across clock cycles since this shared resource (the bank) cannot be accessed by more than one thread simultaneously. This directly degrades performance.
