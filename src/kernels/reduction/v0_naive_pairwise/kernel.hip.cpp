@@ -1,6 +1,7 @@
 #include <hip/hip_runtime.h>
 #include <iostream>
 #include "utils/random_int.hpp"
+#include "utils/hip_check.hpp"
 
 // helper function to verify the result of the kernel
 bool verify_result(const std::vector<int>& A_h, const std::vector<int>& B_h, const std::vector<int>& C_h, int N) {
@@ -43,9 +44,9 @@ int main() {
 
     // allocate device memory
     int *A_d, *B_d, *C_d;
-    hipMalloc(&A_d, bytes);
-    hipMalloc(&B_d, bytes);
-    hipMalloc(&C_d, bytes);
+    HIP_CHECK(hipMalloc(&A_d, bytes));
+    HIP_CHECK(hipMalloc(&B_d, bytes));
+    HIP_CHECK(hipMalloc(&C_d, bytes));
 
     for (int i = 0; i < N; i++) {
         A_h[i] = Utils::Random::int_in_range(1, 10);
@@ -53,21 +54,23 @@ int main() {
     }
 
     // host -> device transfer
-    hipMemcpy(A_d, A_h.data(), bytes, hipMemcpyHostToDevice);
-    hipMemcpy(B_d, B_h.data(), bytes, hipMemcpyHostToDevice);
+    HIP_CHECK(hipMemcpy(A_d, A_h.data(), bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(B_d, B_h.data(), bytes, hipMemcpyHostToDevice));
     // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
 
     int blockSize = 256;
     int blockCount = (N + blockSize - 1) / blockSize;
 
     hipLaunchKernelGGL(add_kernel, dim3(blockCount), dim3(blockSize), 0, 0, A_d, B_d, C_d, N);
-    hipDeviceSynchronize();
+    HIP_KERNEL_CHECK();
+    HIP_CHECK(hipDeviceSynchronize());
 
-    hipMemcpy(C_h.data(), C_d, bytes, hipMemcpyDeviceToHost);
+    HIP_CHECK(hipMemcpy(C_h.data(), C_d, bytes, hipMemcpyDeviceToHost));
 
-    hipFree(A_d);
-    hipFree(B_d);
-    hipFree(C_d);
+    // free device memory immediately, verify after
+    HIP_CHECK(hipFree(A_d));
+    HIP_CHECK(hipFree(B_d));
+    HIP_CHECK(hipFree(C_d));
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
 
