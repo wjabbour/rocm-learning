@@ -141,7 +141,7 @@ int main() {
     const size_t bytesB = K * N * sizeof(float);
     const size_t bytesC = M * N * sizeof(float);
 
-    // allocate host memory
+    // initialize host memory
     std::vector<float> A_h = {1.0f, 2.0f, 2.0f, 4.0f};
     std::vector<float> B_h = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
     std::vector<float> C_h(M * N, 0.0f);
