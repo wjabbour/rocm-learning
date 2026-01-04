@@ -1,5 +1,6 @@
 #include <hip/hip_runtime.h>
 #include <iostream>
+#include "utils/random_int.hpp"
 
 /*
     My very first kernel
@@ -37,8 +38,8 @@ int main() {
     hipMalloc(&C_d, bytes);
 
     for (int i = 0; i < N; i++) {
-        A_h[i] = i;
-        B_h[i] = i*2;
+        A_h[i] = Utils::Random::int_in_range(1, 10);
+        B_h[i] = Utils::Random::int_in_range(1, 10);
     }
 
     hipMemcpy(A_d, A_h.data(), bytes, hipMemcpyHostToDevice);
