@@ -58,9 +58,9 @@ int main() {
         std::cout << C_h[i] << "\n";
     }
 
-    free(A_d);
-    free(B_d);
-    free(C_d);
+    hipFree(A_d);
+    hipFree(B_d);
+    hipFree(C_d);
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
 
