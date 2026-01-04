@@ -12,22 +12,20 @@ CXX := hipcc
 CXXFLAGS := -O3 -std=c++17 -Wall -Wextra -I. -Isrc
 
 # Target Architecture
-# "native" tells hipcc to query your 9070XT and compile specifically for its GFX version.
-# This ensures you use the latest RDNA instruction sets available to your hardware.
+# "native" tells hipcc to query the GPU and compile specifically for its GFX version.
+# This ensures the latest RDNA instruction sets available to the hardware are used
 ARCH_FLAGS := --offload-arch=native
 
 # Project Files
 TARGET := kernel
 SRC := src/kernels/reduction/v0_naive_pairwise/kernel.hip.cpp
-# List headers here so Make knows to re-compile if you change a helper file
+# List headers here so Make knows to re-compile
 HEADERS := src/utils/hip_check.hpp src/utils/random_int.hpp
 
-# Default Target (what happens when you type 'make')
+# Default Target
 all: $(TARGET)
 
 # Build Rule
-# $@ matches the target (vector_add)
-# $^ matches all dependencies (vector_add.cpp utils/...)
 $(TARGET): $(SRC) $(HEADERS)
 	@echo "Building for generic host + specific device architecture..."
 	$(CXX) $(CXXFLAGS) $(ARCH_FLAGS) $(SRC) -o $(TARGET)
