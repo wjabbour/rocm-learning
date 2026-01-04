@@ -88,7 +88,7 @@ int main() {
     HIP_CHECK(hipEventCreate(&k_start));
     HIP_CHECK(hipEventCreate(&k_stop));
 
-    float kernel_total_μs = 0.0f;
+    float kernel_total_ms = 0.0f;
 
     int blockSize = 64;
     hipDeviceProp_t prop;
@@ -122,7 +122,7 @@ int main() {
 
         float k_μs = 0.0f;
         HIP_CHECK(hipEventElapsedTime(&k_μs , k_start, k_stop));
-        kernel_total_μs += k_μs;
+        kernel_total_ms += k_μs;
 
         HIP_CHECK(hipDeviceSynchronize());
 
@@ -158,7 +158,7 @@ int main() {
     float sys_ms = 0.0f;
     HIP_CHECK(hipEventElapsedTime(&sys_ms, sys_start, sys_stop));
 
-    printf("Kernel-only time = %f μs\n", kernel_total_μs * 1000);
+    printf("Kernel-only time = %f μs\n", kernel_total_ms * 1000);
     printf("System time (host+device) = %f ms\n", sys_ms);
 
     return 0;
