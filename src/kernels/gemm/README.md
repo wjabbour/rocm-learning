@@ -2,12 +2,6 @@
 
 General Matrix Multiply (GEMM) kernels are a core piece of training and inference pipelines. A GEMM kernel is responsible for efficiently multiplying two matrices together to produce an output matrix.
 
-## Build Instructions
-
-```bash
-make clean && make run SRC=src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp
-```
-
 # Learnings
 
 - When requesting data from the memory system (L1, L2, HBM) it is important to ensure that the threads of a wavefront request contiguous data so that the memory controller can coalesce the requests from each thread into as few transactions as possible.
