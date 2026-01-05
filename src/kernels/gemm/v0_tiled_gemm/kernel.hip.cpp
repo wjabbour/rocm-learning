@@ -5,8 +5,6 @@
 #define TILE_SIZE 16
 
 /*
-    This kernel multiplies two matrices and stores the output in a third matrix.
-
     In order to calculate the value of Cᵢⱼ we need row i from matrix A and column j from matrix B. As the dimensions
     of the input matrices increase, more and more data is necessary to calculate each element of C.
 
@@ -176,6 +174,7 @@ int main() {
 
     hipMemcpy(C_h.data(), C_d, bytesC, hipMemcpyDeviceToHost);
 
+    // TODO: replace this with a smaller verification once we increase the input matrix sizes
     for (int i = 0; i < M * N; i++) {
         std::cout << C_h[i] << "\n";
     }

@@ -11,9 +11,9 @@ Finally put the finishing touches on my profiling writeup and was able to utiliz
 Finally finished my writeup of the CDNA 2 white paper. This gave me some great historical context into CDNA
 and will be really valuable to compare to the modern iteration of CDNA.
 
-## 12/18/2025 - Naive GEMM
+## 12/18/2025 - Tiled GEMM
 
-[source](src/kernels/gemm/v0_naive_gemm/kernel.hip.cpp)
+[source](src/kernels/gemm/v0_tiled_gemm/kernel.hip.cpp)
 
 My first introduction to GEMM and matrix multiplication in general. Came to a better understanding of
 LDS, banks, and bank conflicts.
