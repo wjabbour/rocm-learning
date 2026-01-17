@@ -31,11 +31,17 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
 
   As you increase the frequency (clock rate) of a computing chip, the power consumption and heat dissipation of the chip increases polynomially. We cannot increase DIMM bandwidth by simply making it transfer data more frequently because it would get too hot and require too much power.
 
+- Crosstalk
+
+  As you increase the frequency of an electrical signal, the copper trace begins to function as an antenna. The back-and-forth of electrons in the physical medium produces electromagnetic waves which interfere with neighboring traces carrying data.
+
 - Signal Integrity
 
-  As you increase the frequency of an electrical signal, the copper trace begins to function as an antenna. The back-and-forth of electrons in the physical medium produces electromagnetic waves which interfere with neighboring traces carrying data. This effect is called crosstalk.
+  The farther electrons have to travel, the harder they need to be "pushed" along the physical medium to produce waves with enough amplitude differential between "0" and "1" to be easily discernible by the consuming system. 
+  
+  Additionally, capacitance is proportional to the length of the medium. For the producer to drive the signal high (to a "1") at the receiver, the electricity needs to flow along the physical medium, like water flowing through a hose before it reaches the tip and waters your garden. This requires time and energy.
 
-  The core issue is that DIMMs are designed to move relatively small amounts of data at a reasonably high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
+The core issue is that DIMMs are designed to move relatively small amounts of data at a high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
 
 ## A New Hope
 
@@ -43,9 +49,11 @@ There are two primary problems to solve:
 
 1. We need to decrease the physical distance that electrons need to travel.
 
-    This decreases resistance which decreases the voltage required to carry the electrons to the receiver. Less voltage requires less overall power.
+    A decrease in length of the medium directly dereases the resistance of the medium which decreases the voltage required to push electrons through the medium, reducing the power usage of the overall system.
 
 2. We need to increase the amount of data that can be delivered simultaneously.
+
+    Since we cannot increase the frequency that we deliver data, we need to deliver more data with each clock cycle.
 
 ### Distance
 
