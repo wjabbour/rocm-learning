@@ -1,6 +1,7 @@
 - add thorough comments to all existing kernels
 - update kernel code so that all existing kernels look similar and abstract common code to shared utils
 - better define the bandwidth efficiency metric i use in profiling
+- create naive gemm for comparison
 - add profiling writeups to all existing kernels
 - Finish HBM writeup
 - read attention is all you need

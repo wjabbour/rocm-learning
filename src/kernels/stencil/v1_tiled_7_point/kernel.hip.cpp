@@ -10,6 +10,7 @@
 #define TILE_Y  (BLOCK_Y + 2*HALO)
 #define TILE_Z  (BLOCK_Z + 2*HALO)
 
+// TODO: add more thorough comments
 __global__
 void stencil3d_7pt(const float* __restrict__ in,
                    float* __restrict__ out,
