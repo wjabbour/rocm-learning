@@ -13,7 +13,7 @@ and will be really valuable to compare to the modern iteration of CDNA.
 
 ## 12/18/2025 - Tiled GEMM
 
-[source](src/kernels/gemm/v0_tiled_gemm/kernel.hip.cpp)
+[source](src/kernels/gemm/v1_tiled_gemm/kernel.hip.cpp)
 
 My first introduction to GEMM and matrix multiplication in general. Came to a better understanding of
 LDS, banks, and bank conflicts.

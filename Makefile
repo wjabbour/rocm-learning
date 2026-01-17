@@ -9,7 +9,7 @@ CXX := hipcc
 # Dynamic Source Selection
 # -------------------------------------------------------------------------
 # Default Source: The kernel used if you just type 'make' or 'make run'
-# You can override this via command line: make run SRC=src/kernels/gemm/v0_tiled_gemm/kernel.hip.cpp
+# You can override this via command line: make run SRC=src/kernels/gemm/v1_tiled_gemm/kernel.hip.cpp
 SRC ?= src/kernels/reduction/v0_naive_pairwise/kernel.hip.cpp
 
 # Output Handling
