@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include "utils/wave_utils.hpp"
+#include "utils/hip_check.hpp"
 
 __device__ float waveReduceMax(float val) {
     float neighbor = __shfl_down(val, 16);
@@ -108,18 +109,19 @@ int main() {
     std::vector<float> h_out(N);
 
     float *d_in, *d_out;
-    hipMalloc(&d_in, bytes);
-    hipMalloc(&d_out, bytes);
+    HIP_CHECK(hipMalloc(&d_in, bytes));
+    HIP_CHECK(hipMalloc(&d_out, bytes));
 
-    hipMemcpy(d_in, h_in.data(), bytes, hipMemcpyHostToDevice);
+    HIP_CHECK(hipMemcpy(d_in, h_in.data(), bytes, hipMemcpyHostToDevice));
 
     hipLaunchKernelGGL(softmax_kernel, dim3(1), dim3(256), 0, 0, d_in, d_out);
+    HIP_KERNEL_CHECK();
 
-    hipMemcpy(h_out.data(), d_out, bytes, hipMemcpyDeviceToHost);
+    HIP_CHECK(hipMemcpy(h_out.data(), d_out, bytes, hipMemcpyDeviceToHost));
 
     std::cout << "result: " << h_out[0] << std::endl;
 
-    hipFree(d_in);
-    hipFree(d_out);
+    HIP_CHECK(hipFree(d_in));
+    HIP_CHECK(hipFree(d_out));
     return 0;
 }
