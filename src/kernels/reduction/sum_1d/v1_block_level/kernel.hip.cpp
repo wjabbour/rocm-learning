@@ -7,12 +7,6 @@
 __global__ void block_reduction(int* in, int* out, size_t N) {
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
-    /*
-        with each kernel launch, we launch {current_value_of_n} / WORK_PER_THREAD threads
-        since we are launching less threads than N, each thread needs to be responsible for 
-        summing WORK_PER_THREAD units of N
-    */
-    size_t i = tid * WORK_PER_THREAD;
 
     /*
         our thread must be within N, else we will pull garbage data

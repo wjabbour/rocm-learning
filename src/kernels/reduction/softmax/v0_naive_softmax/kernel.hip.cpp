@@ -2,16 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-
-__device__ float waveReduceSum(float val) {
-    val += __shfl_down(val, 16, 32);
-    val += __shfl_down(val, 8, 32);
-    val += __shfl_down(val, 4, 32);
-    val += __shfl_down(val, 2, 32);
-    val += __shfl_down(val, 1, 32);
-
-    return val;
-}
+#include "utils/wave_utils.hpp"
 
 __device__ float waveReduceMax(float val) {
     float neighbor = __shfl_down(val, 16);
