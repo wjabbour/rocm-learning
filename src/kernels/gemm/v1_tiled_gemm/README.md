@@ -50,3 +50,32 @@ make clean && make run SRC=src/kernels/gemm/v1_tiled_gemm/kernel.hip.cpp
   Now consider that instead we are storing doubles in LDS (8 bytes, 64 bits). Each double is stored across two banks. Lane 0 requests from bank 0 and 1, lane 1 requests from bank 2 and 3... lane 16 requests from bank 0 and 1.
 
   PROBLEM: We now have two lanes simultaneously accessing the same bank.
+
+- In order to calculate the value of Cᵢⱼ we need row i from matrix A and column j from matrix B. As the dimensions of the input matrices increase, more and more data is necessary to calculate each element of C.
+
+  The kernel is going to need to make many requests from global memory. Therein lies a potential pitfall: although we think of A and B as matrices, they are stored as 1D contiguous chunks of memory in a format called "row major".
+
+  Row major means that the contents of each row are stored contiguously and adjacent rows are stored contiguously.
+
+  e.g.
+
+  rowMajorArray = [1, 2, 3, 4, 5, 6]
+
+  If we declare that this represents a 3x2 matrix, then that matrix looks like this:
+
+  ```
+  1 2
+  3 4
+  5 6
+  ```
+
+  Here you can see that as you traverse down a column, you are actually traversing N steps at a time (Here N is 2, 1 appears at index 0 and 3 appears at index 2). As N grows, the steps you take as you traverse the columns grows.
+
+  Tying this back to the hardware: when the threads of a wavefront request the contents of memory addresses from the Vector Memory Unit, the VMU attempts to coalesce these requests into as few requests as possible. It does this by using its knowledge of the platform's cache line size, and determining which memory addresses fit into that size.
+
+  If we were to tell a thread to load all of the data from a column of B, if N * lds_data_type_bytes > cache_line_size (very likely) then every single data load would need a separate request to global memory. Our kernel would immediately become memory-bound.
+
+  We solve this by breaking the problem into "tiles". We fetch TILE_SIZExTILE_SIZE tiles of data from A and B. This solves two problems with our data access:
+
+  1) instead of each thread creating an uncoalesced memory transaction, the threads work together to bring wide chunks of data back from global memory which optimizes our use of the available memory bandwidth.
+  2) we reuse the data TILE_SIZE times once loaded into LDS which amortizes the cost of loading from global memory.

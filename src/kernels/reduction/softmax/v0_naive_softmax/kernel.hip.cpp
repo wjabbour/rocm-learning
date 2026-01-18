@@ -1,27 +1,3 @@
-/*
-    Softmax is one of the most critical kernels for inference. It takes in a list of K real numbers
-    and calculates a probability distribution of K possible outcomes. In inference, this is used
-    to predict the most likely token that should come next in the sequence.
-
-    This is a dummy version of softmax because
-
-    1) the input is an array of floats
-    2) we are only performing these calculations over a single block
-
-    This kernel performs the following steps
-
-    1) First we need to find the maximum value from the input. We do this by each wavefront using warp shuffling
-    to find the maximum value in the wavefront. Once that value is found, each wavefront writes to LDS.
-    2) Now that each wavefront has written its own maximum value, we use warp shuffling again - this time
-    using the first 8 threads (we use 8 because 256 (input size) divided by 32 (RDNA wavefront size) = 8) 
-    in the first wave to find the maximum amongst all 8 values in LDS.
-    3) Now that we have the maximum value from the input, we perform a very similar set of steps to find
-    the sum of the input.
-    4) Once we have the sum of the input and the max of the input we can compute our probability distribution. Each thread
-    picks a value from the input, subtracts the max from the value and computes e^(val - max). Once this computation is complete
-    it yields y. Each thread then writes y / globalSum to the output. This is our probability distribution.
-*/
-
 #include <hip/hip_runtime.h>
 #include <iostream>
 #include <vector>
