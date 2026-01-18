@@ -3,13 +3,28 @@
 #include "utils/hip_check.hpp"
 #include "utils/hip_check.hpp"
 
-# define BLOCK_SIZE 512
+#define BLOCK_SIZE 512
 
 __global__ void block_reduction(int* in, int* out, size_t N) {
+    __shared__ float wavefront[8];
+
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
 
-    float waveSum = 0.0f;
+    /*
+        the first wavefront of the block will write the final value to global memory. This 
+        choice is arbitrary: any wavefront is capable of this step.
+    */ 
+    int wfId = blockIdx / 32;
+    // the thread at lane 0 will hold the final value from our wave-shuffle reduction
+    int laneId = threadIdx.x % 32;
+
+    // load data from global memory, contiguous threads access contiguous memory
+    int data = in[tid];
+
+    // sum all values in the wavefront
+    size_t waveSum = waveReduceSum(data);
+
 
     
 }
