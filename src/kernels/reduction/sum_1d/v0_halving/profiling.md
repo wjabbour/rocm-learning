@@ -76,7 +76,7 @@ There are two primary improvements I can identify:
 1. Vectorized Loads - the kernel is using scalar load instructions, loading individual `int`s from memory at a time. Since we know that in most cases we wish to load multiple `int`s at once, let's try using the `int4` data type to fetch 128 bits at a time. This will reduce the load on the instruction pipeline and increase performance.
 2. Memory Bandwidth - the kernel is performing an excess number of memory writes (and subsequently reads) because the aggregation does not shrink N aggressively enough. We need to use LDS and coordinate all of the wavefronts in a block to aggregate to a single value. Now, each kernel pass will decrease N by a factor of threadsPerBlock.
 
-Since #2 is a different paradigm, I will perform that work in the [block-level kernel reduction](../v2_block_level/kernel.hip.cpp).
+Since #2 is a different paradigm, I will perform that work in the [block-level kernel reduction](../v1_block_level/kernel.hip.cpp).
 
 ## Third Implementation
 
@@ -98,4 +98,4 @@ The runtime was not substantially different. Either the memory system or the com
 
 ### Suggested Improvements
 
-Let's move forward with the [block-level reduction](../v2_block_level/kernel.hip.cpp). 
+Let's move forward with the [block-level reduction](../v1_block_level/kernel.hip.cpp). 

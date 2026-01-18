@@ -10,7 +10,7 @@ CXX := hipcc
 # -------------------------------------------------------------------------
 # Default Source: The kernel used if you just type 'make' or 'make run'
 # You can override this via command line: make run SRC=src/kernels/gemm/v1_tiled_gemm/kernel.hip.cpp
-SRC ?= src/kernels/reduction/v0_naive_pairwise/kernel.hip.cpp
+SRC ?= src/kernels/primitives/v0_vector_add/kernel.hip.cpp
 
 # Output Handling
 # 1. Strip directory path (src/kernels/.../kernel.hip.cpp -> kernel.hip.cpp)

@@ -14,9 +14,9 @@ My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU 
 
 # Currently Working On
 
-I’m currently re-visiting my previous kernels, profiling them, and creating profiling writeups - currently working on my [block-level reduction](src/kernels/reduction/v2_block_level/kernel.hip.cpp).
+I'm currently re-visiting my previous kernels, profiling them, and creating profiling writeups - currently working on my [block-level reduction](src/kernels/reduction/sum_1d/v1_block_level/kernel.hip.cpp).
 
-I just finished the writeup for my [halving reduction](src/kernels/reduction/v1_halving/profiling.md).
+I just finished the writeup for my [halving reduction](src/kernels/reduction/sum_1d/v0_halving/profiling.md).
 
 [Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
 

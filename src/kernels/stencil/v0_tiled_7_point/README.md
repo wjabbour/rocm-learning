@@ -13,5 +13,5 @@ Bottlenecks:
 ## Build Instructions
 
 ```bash
-make clean && make run SRC=src/kernels/stencil/v1_tiled_7_point/kernel.hip.cpp
+make clean && make run SRC=src/kernels/stencil/v0_tiled_7_point/kernel.hip.cpp
 ```

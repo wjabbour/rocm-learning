@@ -11,8 +11,8 @@ In the case of Softmax, we use this algorithm to create a probability distributi
 
 ## Kernel Progression
 
-| Version | Name                | Key Strategy | Bottleneck Solved | Remaining Issue                   |
-| :------ | :------------------ | :----------- | :---------------- | :-------------------------------- |
-| **v0**  | `v0_naive_pairwise` |              | Correctness       | **Low Arithmetic Intensity:** xyz |
-| **v1**  | `v1_halving`        | -            | -                 | **reason:** xyz                   |
-| **v2**  | `v2_block_level`    | -            | -                 | **reason:** xyz                   |
+| Version | Name                      | Key Strategy | Bottleneck Solved | Remaining Issue                   |
+| :------ | :------------------------ | :----------- | :---------------- | :-------------------------------- |
+| **v0**  | `sum_1d/v0_halving`       | -            | -                 | **reason:** xyz                   |
+| **v1**  | `sum_1d/v1_block_level`   | -            | -                 | **reason:** xyz                   |
+| **v0**  | `softmax/v0_naive_softmax` | -            | -                 | **reason:** xyz                   |

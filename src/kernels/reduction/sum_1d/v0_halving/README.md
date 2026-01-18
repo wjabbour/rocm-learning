@@ -15,7 +15,7 @@ Bottlenecks:
 ## Build Instructions
 
 ```bash
-make clean && make run SRC=src/kernels/reduction/v1_halving/kernel.hip.cpp
+make clean && make run SRC=src/kernels/reduction/sum_1d/v0_halving/kernel.hip.cpp
 ```
 
 ## Learnings
