@@ -1,4 +1,4 @@
-- add thorough comments to all existing kernels
+- clear up the distinction between execution model and algorithm in my kernel readmes
 - update kernel code so that all existing kernels look similar and abstract common code to shared utils
 - better define the bandwidth efficiency metric i use in profiling
 - create naive gemm for comparison
