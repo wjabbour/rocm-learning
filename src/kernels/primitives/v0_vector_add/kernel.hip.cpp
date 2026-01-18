@@ -22,7 +22,7 @@ bool verify_result(const std::vector<int>& A_h, const std::vector<int>& B_h, con
 
     We launch N threads to process input of size N, where N = A.length = B.length
 
-    Thus, each thread computes its global index in the grid and access A[idx] and B[idx],
+    Thus, each thread computes its global index in the grid and accesses A[idx] and B[idx],
     performs some calculation (in this case, addition) and writes to C[idx]
 */
 __global__ void add_kernel(int* A, int* B, int* C, int N) {
@@ -61,7 +61,7 @@ int main() {
     // host -> device transfer
     HIP_CHECK(hipMemcpy(A_d, A_h.data(), bytes, hipMemcpyHostToDevice));
     HIP_CHECK(hipMemcpy(B_d, B_h.data(), bytes, hipMemcpyHostToDevice));
-    // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
+    // we dont need to copy the output buffer to the device because we are going to overwrite its contents
 
     hipEvent_t k_start, k_stop;
     HIP_CHECK(hipEventCreate(&k_start));

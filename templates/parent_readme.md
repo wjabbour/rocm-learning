@@ -1,6 +1,6 @@
 # Overview
 
-# Kernel Progression
+## Kernel Progression
 
 | Version | Name   | Key Strategy | Bottleneck Solved | Remaining Issue |
 | :------ | :----- | :----------- | :---------------- | :-------------- |
