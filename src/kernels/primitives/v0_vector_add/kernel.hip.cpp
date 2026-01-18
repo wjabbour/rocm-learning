@@ -13,18 +13,6 @@ bool verify_result(const std::vector<int>& A_h, const std::vector<int>& B_h, con
     return true;
 }
 
-/*
-    My very first kernel
-
-    Receives a pointer to input A, input B, and output C.
-
-    A and B both represent 1D input arrays and C represents a 1D output array.
-
-    We launch N threads to process input of size N, where N = A.length = B.length
-
-    Thus, each thread computes its global index in the grid and accesses A[idx] and B[idx],
-    performs some calculation (in this case, addition) and writes to C[idx]
-*/
 __global__ void add_kernel(int* A, int* B, int* C, int N) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
