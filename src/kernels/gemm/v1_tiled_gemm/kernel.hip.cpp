@@ -104,19 +104,19 @@ int main() {
     const size_t bytes_c = m * n * sizeof(float);
 
     // initialize host memory
-    std::vector<float> a_h = {1.0f, 2.0f, 2.0f, 4.0f};
-    std::vector<float> b_h = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
-    std::vector<float> c_h(m * n, 0.0f);
+    std::vector<float> h_a = {1.0f, 2.0f, 2.0f, 4.0f};
+    std::vector<float> h_b = {1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f};
+    std::vector<float> h_c(m * n, 0.0f);
  
     // allocate device memory
-    float *a_d, *b_d, *c_d;
-    HIP_CHECK(hipMalloc(&a_d, bytes_a));
-    HIP_CHECK(hipMalloc(&b_d, bytes_b));
-    HIP_CHECK(hipMalloc(&c_d, bytes_c));
+    float *d_a, *d_b, *d_c;
+    HIP_CHECK(hipMalloc(&d_a, bytes_a));
+    HIP_CHECK(hipMalloc(&d_b, bytes_b));
+    HIP_CHECK(hipMalloc(&d_c, bytes_c));
 
     // host -> device transfer
-    HIP_CHECK(hipMemcpy(a_d, a_h.data(), bytes_a, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(b_d, b_h.data(), bytes_b, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_a, h_a.data(), bytes_a, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_b, h_b.data(), bytes_b, hipMemcpyHostToDevice));
     // we dont need to copy the output buffer to the device because we are going to overwrite it's contents
 
     /*
@@ -133,20 +133,20 @@ int main() {
     */
     dim3 num_blocks((n + TILE_SIZE - 1) / TILE_SIZE, (m + TILE_SIZE - 1) / TILE_SIZE);
 
-    hipLaunchKernelGGL(matrixMultiply, dim3(num_blocks), dim3(block_size), 0, 0, a_d, b_d, c_d, m, n, k);
+    hipLaunchKernelGGL(matrixMultiply, dim3(num_blocks), dim3(block_size), 0, 0, d_a, d_b, d_c, m, n, k);
     HIP_KERNEL_CHECK();
     HIP_CHECK(hipDeviceSynchronize());
 
-    HIP_CHECK(hipMemcpy(c_h.data(), c_d, bytes_c, hipMemcpyDeviceToHost));
+    HIP_CHECK(hipMemcpy(h_c.data(), d_c, bytes_c, hipMemcpyDeviceToHost));
 
     // TODO: replace this with a smaller verification once we increase the input matrix sizes
     for (int i = 0; i < m * n; i++) {
-        std::cout << c_h[i] << "\n";
+        std::cout << h_c[i] << "\n";
     }
 
-    HIP_CHECK(hipFree(a_d));
-    HIP_CHECK(hipFree(b_d));
-    HIP_CHECK(hipFree(c_d));
+    HIP_CHECK(hipFree(d_a));
+    HIP_CHECK(hipFree(d_b));
+    HIP_CHECK(hipFree(d_c));
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
 

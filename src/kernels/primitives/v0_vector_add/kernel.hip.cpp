@@ -4,9 +4,9 @@
 #include "utils/hip_check.hpp"
 
 // helper function to verify the result of the kernel
-bool verifyResult(const std::vector<int>& a_h, const std::vector<int>& b_h, const std::vector<int>& c_h, int n) {
+bool verifyResult(const std::vector<int>& h_a, const std::vector<int>& h_b, const std::vector<int>& h_c, int n) {
     for (int i = 0; i < n; i++) {
-        if (c_h[i] != a_h[i] + b_h[i]) {
+        if (h_c[i] != h_a[i] + h_b[i]) {
             return false;
         }
     }
@@ -31,24 +31,24 @@ int main() {
     size_t bytes = n * sizeof(int);
 
     // initialize host memory
-    std::vector<int> a_h(n, 0);
-    std::vector<int> b_h(n, 0);
-    std::vector<int> c_h(n, 0);
+    std::vector<int> h_a(n, 0);
+    std::vector<int> h_b(n, 0);
+    std::vector<int> h_c(n, 0);
 
     // allocate device memory
-    int *a_d, *b_d, *c_d;
-    HIP_CHECK(hipMalloc(&a_d, bytes));
-    HIP_CHECK(hipMalloc(&b_d, bytes));
-    HIP_CHECK(hipMalloc(&c_d, bytes));
+    int *d_a, *d_b, *d_c;
+    HIP_CHECK(hipMalloc(&d_a, bytes));
+    HIP_CHECK(hipMalloc(&d_b, bytes));
+    HIP_CHECK(hipMalloc(&d_c, bytes));
 
     for (int i = 0; i < n; i++) {
-        a_h[i] = Utils::Random::int_in_range(1, 10);
-        b_h[i] = Utils::Random::int_in_range(1, 10);
+        h_a[i] = Utils::Random::int_in_range(1, 10);
+        h_b[i] = Utils::Random::int_in_range(1, 10);
     }
 
     // host -> device transfer
-    HIP_CHECK(hipMemcpy(a_d, a_h.data(), bytes, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(b_d, b_h.data(), bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_a, h_a.data(), bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_b, h_b.data(), bytes, hipMemcpyHostToDevice));
     // we dont need to copy the output buffer to the device because we are going to overwrite its contents
 
     hipEvent_t k_start, k_stop;
@@ -63,7 +63,7 @@ int main() {
     HIP_CHECK(hipEventRecord(k_start, 0));
 
     // launch kernel
-    hipLaunchKernelGGL(addKernel, dim3(block_count), dim3(block_size), 0, 0, a_d, b_d, c_d, n);
+    hipLaunchKernelGGL(addKernel, dim3(block_count), dim3(block_size), 0, 0, d_a, d_b, d_c, n);
     HIP_KERNEL_CHECK();
     HIP_CHECK(hipEventRecord(k_stop, 0));
 
@@ -75,12 +75,12 @@ int main() {
     HIP_CHECK(hipDeviceSynchronize());
 
     // device -> host transfer
-    HIP_CHECK(hipMemcpy(c_h.data(), c_d, bytes, hipMemcpyDeviceToHost));
+    HIP_CHECK(hipMemcpy(h_c.data(), d_c, bytes, hipMemcpyDeviceToHost));
 
     // free device memory immediately, verify after
-    HIP_CHECK(hipFree(a_d));
-    HIP_CHECK(hipFree(b_d));
-    HIP_CHECK(hipFree(c_d));
+    HIP_CHECK(hipFree(d_a));
+    HIP_CHECK(hipFree(d_b));
+    HIP_CHECK(hipFree(d_c));
 
     // vectors use the RAII principle, calling their destructors when the function scope ends
 
@@ -93,7 +93,7 @@ int main() {
     printf("Kernel-only time = %f μs\n", kernel_total_ms * 1000);
     printf("System time (host+device) = %f ms\n", sys_ms);
 
-    if (verifyResult(a_h, b_h, c_h, n)) {
+    if (verifyResult(h_a, h_b, h_c, n)) {
         printf("Input processed correctly\n");
     } else {
         printf("Input processed incorrectly\n");

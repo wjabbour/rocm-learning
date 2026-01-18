@@ -40,15 +40,15 @@ int main() {
     size_t output_bytes = output_elements * sizeof(int);
     
     // allocate host memory
-    int *in_d, *out_d;
-    int *in_h = (int*)malloc(input_bytes);
-    if (in_h == NULL) {
+    int *d_in, *d_out;
+    int *h_in = (int*)malloc(input_bytes);
+    if (h_in == NULL) {
         printf("Input array host memory allocation failed\n");
         exit(1);
     }
 
-    int* out_h = (int*)calloc(output_elements, sizeof(int));
-    if (out_h == NULL) {
+    int* h_out = (int*)calloc(output_elements, sizeof(int));
+    if (h_out == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
     }
@@ -56,21 +56,21 @@ int main() {
     printf("Allocated input and output arrays\n");
 
     // allocate device memory
-    HIP_CHECK(hipMalloc(&in_d, input_bytes));
-    HIP_CHECK(hipMalloc(&out_d, output_bytes));
+    HIP_CHECK(hipMalloc(&d_in, input_bytes));
+    HIP_CHECK(hipMalloc(&d_out, output_bytes));
 
     printf("Allocated device arrays\n");
 
     // initialize host memory
     for (size_t i = 0; i < n; i++) {
-        in_h[i] = Utils::Random::int_in_range(1, 1);
+        h_in[i] = Utils::Random::int_in_range(1, 1);
     }
 
     printf("Populated input array\n");
 
     // host -> device transfer
-    HIP_CHECK(hipMemcpy(in_d, in_h, input_bytes, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(out_d, out_h, output_bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_in, h_in, input_bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_out, h_out, output_bytes, hipMemcpyHostToDevice));
 
     size_t current_n = n;
 
@@ -100,8 +100,8 @@ int main() {
             dim3(BLOCK_SIZE), 
             0,
             0,
-            in_d,
-            out_d,
+            d_in,
+            d_out,
             current_n
         );
         HIP_KERNEL_CHECK();
@@ -121,25 +121,25 @@ int main() {
             we alloc two fixed size buffers of data that we use throughout the 
             entirety of the kernel
         */
-        std::swap(in_d, out_d);
+        std::swap(d_in, d_out);
         current_n = output_size;
     }
 
     /*
-        since we swap the pointers after every kernel launch, in_d will
+        since we swap the pointers after every kernel launch, d_in will
         always hold the most recent output data. I swap once more here because
         it just feels "right" to memcpy from device output pointer :) 
     */
-    std::swap(in_d, out_d);
-    HIP_CHECK(hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost));
+    std::swap(d_in, d_out);
+    HIP_CHECK(hipMemcpy(h_out, d_out, sizeof(int), hipMemcpyDeviceToHost));
 
     // the answer!
-    printf("Result: %i\n", out_h[0]);
+    printf("Result: %i\n", h_out[0]);
 
-    HIP_CHECK(hipFree(in_d));
-    HIP_CHECK(hipFree(out_d));
-    free(in_h);
-    free(out_h);
+    HIP_CHECK(hipFree(d_in));
+    HIP_CHECK(hipFree(d_out));
+    free(h_in);
+    free(h_out);
 
     HIP_CHECK(hipEventRecord(sys_stop, 0));
     HIP_CHECK(hipEventSynchronize(sys_stop));

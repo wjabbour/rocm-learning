@@ -148,23 +148,23 @@ int main() {
     const int n = nz * ny * nx;
     size_t size = n * sizeof(float);
 
-    float *in_d, *out_d;
+    float *d_in, *d_out;
 
-    float *in_h = (float*)malloc(size);
-    float *out_h = (float*)malloc(size);
+    float *h_in = (float*)malloc(size);
+    float *h_out = (float*)malloc(size);
 
-    HIP_CHECK(hipMalloc(&in_d, size));
-    HIP_CHECK(hipMalloc(&out_d, size));
+    HIP_CHECK(hipMalloc(&d_in, size));
+    HIP_CHECK(hipMalloc(&d_out, size));
 
     for (int z = 0; z < nz; z++) {
         for (int y = 0; y < ny; y++) {
             for (int x = 0; x < nx; x++) {
-                in_h[(z * ny + y) * nx + x] = static_cast<float>(x + y + z);
+                h_in[(z * ny + y) * nx + x] = static_cast<float>(x + y + z);
             }
         }
     }
 
-    HIP_CHECK(hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(d_in, h_in, size, hipMemcpyHostToDevice));
 
     dim3 block_dim(BLOCK_X, BLOCK_Y, BLOCK_Z);
     dim3 grid_dim((nx + block_dim.x - 1) / block_dim.x,
@@ -176,8 +176,8 @@ int main() {
                         block_dim,
                         0,
                         0,
-                        in_d,
-                        out_d,
+                        d_in,
+                        d_out,
                         nx,
                         ny,
                         nz
@@ -185,20 +185,20 @@ int main() {
     HIP_KERNEL_CHECK();
 
     HIP_CHECK(hipDeviceSynchronize());
-    HIP_CHECK(hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost));
+    HIP_CHECK(hipMemcpy(h_out, d_out, size, hipMemcpyDeviceToHost));
 
     for (int z = 0; z < nz; z++) {
         for (int y = 0; y < ny; y++) {
             for (int x = 0; x < nx; x++) {
-                printf("%f\n", out_h[(z * ny + y) * nx + x]);
+                printf("%f\n", h_out[(z * ny + y) * nx + x]);
             }
         }
     }
 
-    HIP_CHECK(hipFree(in_d));
-    HIP_CHECK(hipFree(out_d));
-    free(in_h);
-    free(out_h);
+    HIP_CHECK(hipFree(d_in));
+    HIP_CHECK(hipFree(d_out));
+    free(h_in);
+    free(h_out);
 
     return 0;
 }
