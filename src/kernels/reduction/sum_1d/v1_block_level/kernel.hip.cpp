@@ -3,6 +3,7 @@
 #include "utils/hip_check.hpp"
 
 #define WORK_PER_THREAD 8
+# define BLOCK_SIZE 512
 
 __global__ void block_reduction(int* in, int* out, size_t N) {
     // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
@@ -49,11 +50,12 @@ int main() {
     size_t N = 1ULL << 31;
     size_t inputBytes = N * sizeof(int);
 
-    // the output buffer is smaller than N since we aggregate the data in the kernel
-    size_t outputElements = (N + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
+    // each block will produce a single output value, so our initial output size is equal to the number of blocks launched
+    size_t outputElements = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
     size_t outputBytes = outputElements * sizeof(int);
+    
+    // allocate host memory
     int *in_d, *out_d;
-
     int *in_h = (int*)malloc(inputBytes);
     if (in_h == NULL) {
         printf("Input array host memory allocation failed\n");
@@ -68,17 +70,20 @@ int main() {
 
     printf("Allocated input and output arrays\n");
 
+    // allocate device memory
     HIP_CHECK(hipMalloc(&in_d, inputBytes));
     HIP_CHECK(hipMalloc(&out_d, outputBytes));
 
     printf("Allocated device arrays\n");
 
+    // initialize host memory
     for (size_t i = 0; i < N; i++) {
-        in_h[i] = Utils::Random::int_in_range(1, 10);
+        in_h[i] = Utils::Random::int_in_range(1, 1);
     }
 
-    printf("Populated input and output arrays\n");
+    printf("Populated input array\n");
 
+    // host -> device transfer
     HIP_CHECK(hipMemcpy(in_d, in_h, inputBytes, hipMemcpyHostToDevice));
     HIP_CHECK(hipMemcpy(out_d, out_h, outputBytes, hipMemcpyHostToDevice));
 
@@ -90,15 +95,14 @@ int main() {
 
     float kernel_total_ms = 0.0f;
 
-    int blockSize = 64;
     hipDeviceProp_t prop;
     hipGetDeviceProperties(&prop, 0);
 
     while (currentN > 1) {
-        int outputSize = (currentN + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
-        int blockCount = (outputSize + blockSize - 1) / blockSize;
+        int outputSize = (currentN + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        int blockCount = (outputSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-        if (size_t(blockCount * blockSize) > (size_t)prop.maxGridSize[0]) {
+        if (size_t(blockCount * BLOCK_SIZE) > (size_t)prop.maxGridSize[0]) {
             printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", blockCount, prop.maxGridSize[0]);
             exit(1);
         }
@@ -108,7 +112,7 @@ int main() {
         hipLaunchKernelGGL(
             block_reduction,
             dim3(blockCount),
-            dim3(blockSize), 
+            dim3(BLOCK_SIZE), 
             0,
             0,
             in_d,
