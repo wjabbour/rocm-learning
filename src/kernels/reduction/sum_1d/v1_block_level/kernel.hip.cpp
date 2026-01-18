@@ -2,11 +2,10 @@
 #include "utils/random_int.hpp"
 #include "utils/hip_check.hpp"
 
-#define WORK_PER_THREAD 8
 # define BLOCK_SIZE 512
 
 __global__ void block_reduction(int* in, int* out, size_t N) {
-    // we are launching a 1D grid of threads, so the index of this thread in the x-dimension is its global id
+    // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     /*
         with each kernel launch, we launch {current_value_of_n} / WORK_PER_THREAD threads
