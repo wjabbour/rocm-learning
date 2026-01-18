@@ -8,11 +8,3 @@ In the case of Softmax, we use this algorithm to create a probability distributi
 
 1) Numerical stability - if the function which produces our distribution relies on exponentiation, then even relatively small inputs may exceed the maximum size of the data type of our kernel variable. To address this, we must perform a max reduction to find the maximum element from the input and subtract that value from all input elements.
 2) Normalization - we must divide each input element by the sum of all input elements. In order to find that sum, we must perform a reduction.
-
-## Kernel Progression
-
-| Version | Name                      | Key Strategy | Bottleneck Solved | Remaining Issue                   |
-| :------ | :------------------------ | :----------- | :---------------- | :-------------------------------- |
-| **v0**  | `sum_1d/v0_halving`       | -            | -                 | **reason:** xyz                   |
-| **v1**  | `sum_1d/v1_block_level`   | -            | -                 | **reason:** xyz                   |
-| **v0**  | `softmax/v0_naive_softmax` | -            | -                 | **reason:** xyz                   |
