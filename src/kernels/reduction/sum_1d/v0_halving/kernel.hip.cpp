@@ -4,30 +4,30 @@
 
 #define WORK_PER_THREAD 8
 
-__global__ void halving_reduction(int* in, int* out, size_t N) {
+__global__ void halvingReduction(int* in, int* out, size_t n) {
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
     /*
         with each kernel launch, we launch {current_value_of_n} / WORK_PER_THREAD threads
-        since we are launching less threads than N, each thread needs to be responsible for 
-        summing WORK_PER_THREAD units of N
+        since we are launching less threads than n, each thread needs to be responsible for 
+        summing WORK_PER_THREAD units of n
     */
     size_t i = tid * WORK_PER_THREAD;
 
     /*
-        our thread must be within N, else we will pull garbage data
+        our thread must be within n, else we will pull garbage data
     */
-    if (i < N) {
+    if (i < n) {
         int sum = 0;
         /*
-            once we know that we are on a thread that is within N, we need to find
-            how many indices to the right (up to WORK_PER_THREAD) are also within N
+            once we know that we are on a thread that is within n, we need to find
+            how many indices to the right (up to WORK_PER_THREAD) are also within n
 
             we start at the rightmost index (i + WORK_PER_THREAD), walking left until we find that the index is
-            within N and use the inner loop to sum the indices from there to i
+            within n and use the inner loop to sum the indices from there to i
         */
         for (int j = WORK_PER_THREAD - 1; j >= 0; j--) {
-            if (i + j < N) {
+            if (i + j < n) {
                 for (int k = j; k >= 0; k--) {
                     sum += in[i + k];
                 }
@@ -46,21 +46,21 @@ int main() {
 
     HIP_CHECK(hipEventRecord(sys_start, 0));
 
-    size_t N = 1ULL << 31;
-    size_t inputBytes = N * sizeof(int);
+    size_t n = 1ULL << 31;
+    size_t input_bytes = n * sizeof(int);
 
-    // the output buffer is smaller than N since we aggregate the data in the kernel
-    size_t outputElements = (N + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
-    size_t outputBytes = outputElements * sizeof(int);
+    // the output buffer is smaller than n since we aggregate the data in the kernel
+    size_t output_elements = (n + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
+    size_t output_bytes = output_elements * sizeof(int);
     int *in_d, *out_d;
 
-    int *in_h = (int*)malloc(inputBytes);
+    int *in_h = (int*)malloc(input_bytes);
     if (in_h == NULL) {
         printf("Input array host memory allocation failed\n");
         exit(1);
     }
 
-    int* out_h = (int*)calloc(outputElements, sizeof(int));
+    int* out_h = (int*)calloc(output_elements, sizeof(int));
     if (out_h == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
@@ -68,21 +68,21 @@ int main() {
 
     printf("Allocated input and output arrays\n");
 
-    HIP_CHECK(hipMalloc(&in_d, inputBytes));
-    HIP_CHECK(hipMalloc(&out_d, outputBytes));
+    HIP_CHECK(hipMalloc(&in_d, input_bytes));
+    HIP_CHECK(hipMalloc(&out_d, output_bytes));
 
     printf("Allocated device arrays\n");
 
-    for (size_t i = 0; i < N; i++) {
+    for (size_t i = 0; i < n; i++) {
         in_h[i] = Utils::Random::int_in_range(1, 10);
     }
 
     printf("Populated input and output arrays\n");
 
-    HIP_CHECK(hipMemcpy(in_d, in_h, inputBytes, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(out_d, out_h, outputBytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(in_d, in_h, input_bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(out_d, out_h, output_bytes, hipMemcpyHostToDevice));
 
-    size_t currentN = N;
+    size_t current_n = n;
 
     hipEvent_t k_start, k_stop;
     HIP_CHECK(hipEventCreate(&k_start));
@@ -90,30 +90,30 @@ int main() {
 
     float kernel_total_ms = 0.0f;
 
-    int blockSize = 64;
+    int block_size = 64;
     hipDeviceProp_t prop;
-    hipGetDeviceProperties(&prop, 0);
+    HIP_CHECK(hipGetDeviceProperties(&prop, 0));
 
-    while (currentN > 1) {
-        int outputSize = (currentN + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
-        int blockCount = (outputSize + blockSize - 1) / blockSize;
+    while (current_n > 1) {
+        int output_size = (current_n + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
+        int block_count = (output_size + block_size - 1) / block_size;
 
-        if (size_t(blockCount * blockSize) > (size_t)prop.maxGridSize[0]) {
-            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", blockCount, prop.maxGridSize[0]);
+        if (size_t(block_count * block_size) > (size_t)prop.maxGridSize[0]) {
+            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
             exit(1);
         }
 
         HIP_CHECK(hipEventRecord(k_start, 0));
 
         hipLaunchKernelGGL(
-            halving_reduction,
-            dim3(blockCount),
-            dim3(blockSize), 
+            halvingReduction,
+            dim3(block_count),
+            dim3(block_size), 
             0,
             0,
             in_d,
             out_d,
-            currentN
+            current_n
         );
         HIP_KERNEL_CHECK();
 
@@ -133,7 +133,7 @@ int main() {
             entirety of the kernel
         */
         std::swap(in_d, out_d);
-        currentN = outputSize;
+        current_n = output_size;
     }
 
     /*
@@ -142,13 +142,13 @@ int main() {
         it just feels "right" to memcpy from device output pointer :) 
     */
     std::swap(in_d, out_d);
-    hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost);
+    HIP_CHECK(hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost));
 
     // the answer!
     printf("Result: %i\n", out_h[0]);
 
-    hipFree(in_d);
-    hipFree(out_d);
+    HIP_CHECK(hipFree(in_d));
+    HIP_CHECK(hipFree(out_d));
     free(in_h);
     free(out_h);
 

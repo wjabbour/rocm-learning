@@ -1,4 +1,5 @@
 #include <hip/hip_runtime.h>
+#include "utils/hip_check.hpp"
 
 #define HALO 1
 
@@ -12,9 +13,9 @@
 
 // TODO: add more thorough comments
 __global__
-void stencil3d_7pt(const float* __restrict__ in,
+void stencil3d7pt(const float* __restrict__ in,
                    float* __restrict__ out,
-                   int NX, int NY, int NZ)
+                   int nx, int ny, int nz)
 {
     // Thread indices
     int tx = threadIdx.x;
@@ -58,20 +59,20 @@ void stencil3d_7pt(const float* __restrict__ in,
         int idx = -1;
 
         if (dim == 'X') {
-            if (target_idx >= 0 && target_idx < NX) {
-                idx = (gz * NY + gy) * NX + target_idx;
+            if (target_idx >= 0 && target_idx < nx) {
+                idx = (gz * ny + gy) * nx + target_idx;
                 valid = true;
             }
         }
         else if (dim == 'Y') {
-            if (target_idx >= 0 && target_idx < NY) {
-                idx = (gz * NY + target_idx) * NX + gx;
+            if (target_idx >= 0 && target_idx < ny) {
+                idx = (gz * ny + target_idx) * nx + gx;
                 valid = true;
             }
         }
         else { // Z
-            if (target_idx >= 0 && target_idx < NZ) {
-                idx = (target_idx * NY + gy) * NX + gx;
+            if (target_idx >= 0 && target_idx < nz) {
+                idx = (target_idx * ny + gy) * nx + gx;
                 valid = true;
             }
         }
@@ -88,10 +89,10 @@ void stencil3d_7pt(const float* __restrict__ in,
             tile[lz + offset][ly][lx] = val;
     };
 
-    bool in_bounds = (gx < NX) && (gy < NY) && (gz < NZ);
+    bool in_bounds = (gx < nx) && (gy < ny) && (gz < nz);
 
     // every thread load its central neighbor into LDS
-    tile[lz][ly][lx] = in_bounds ? in[(gz * NY + gy) * NX + gx] : 0.0f;
+    tile[lz][ly][lx] = in_bounds ? in[(gz * ny + gy) * nx + gx] : 0.0f;
 
     // if we are at some boundary, load respective halo
     if (tx == 0) {
@@ -129,7 +130,7 @@ void stencil3d_7pt(const float* __restrict__ in,
     // OOB threads should only perform loads, not compute
     if (!in_bounds) return;
 
-    out[(gz * NY + gy) * NX + gx] = 
+    out[(gz * ny + gy) * nx + gx] = 
         0.5f * tile[lz][ly][lx] +
         0.1f * (tile[lz][ly][lx - 1] +
                 tile[lz][ly][lx + 1] +
@@ -140,61 +141,62 @@ void stencil3d_7pt(const float* __restrict__ in,
 }
 
 int main() {
-    const int NX = 128;
-    const int NY = 128;
-    const int NZ = 128;
+    const int nx = 128;
+    const int ny = 128;
+    const int nz = 128;
 
-    const int N = NZ * NY * NX;
-    size_t size = N * sizeof(float);
+    const int n = nz * ny * nx;
+    size_t size = n * sizeof(float);
 
     float *in_d, *out_d;
 
     float *in_h = (float*)malloc(size);
     float *out_h = (float*)malloc(size);
 
-    hipMalloc(&in_d, size);
-    hipMalloc(&out_d, size);
+    HIP_CHECK(hipMalloc(&in_d, size));
+    HIP_CHECK(hipMalloc(&out_d, size));
 
-    for (int z = 0; z < NZ; z++) {
-        for (int y = 0; y < NY; y++) {
-            for (int x = 0; x < NX; x++) {
-                in_h[(z * NY + y) * NX + x] = static_cast<float>(x + y + z);
+    for (int z = 0; z < nz; z++) {
+        for (int y = 0; y < ny; y++) {
+            for (int x = 0; x < nx; x++) {
+                in_h[(z * ny + y) * nx + x] = static_cast<float>(x + y + z);
             }
         }
     }
 
-    hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice);
+    HIP_CHECK(hipMemcpy(in_d, in_h, size, hipMemcpyHostToDevice));
 
-    dim3 blockDim(BLOCK_X, BLOCK_Y, BLOCK_Z);
-    dim3 gridDim((NX + blockDim.x - 1) / blockDim.x,
-                 (NY + blockDim.y - 1) / blockDim.y,
-                 (NZ + blockDim.z - 1) / blockDim.z);
+    dim3 block_dim(BLOCK_X, BLOCK_Y, BLOCK_Z);
+    dim3 grid_dim((nx + block_dim.x - 1) / block_dim.x,
+                 (ny + block_dim.y - 1) / block_dim.y,
+                 (nz + block_dim.z - 1) / block_dim.z);
 
-    hipLaunchKernelGGL(stencil3d_7pt, 
-                        gridDim,
-                        blockDim,
+    hipLaunchKernelGGL(stencil3d7pt, 
+                        grid_dim,
+                        block_dim,
                         0,
                         0,
                         in_d,
                         out_d,
-                        NX,
-                        NY,
-                        NZ
+                        nx,
+                        ny,
+                        nz
                         );
+    HIP_KERNEL_CHECK();
 
-    hipDeviceSynchronize();
-    hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost);
+    HIP_CHECK(hipDeviceSynchronize());
+    HIP_CHECK(hipMemcpy(out_h, out_d, size, hipMemcpyDeviceToHost));
 
-    for (int z = 0; z < NZ; z++) {
-        for (int y = 0; y < NY; y++) {
-            for (int x = 0; x < NX; x++) {
-                printf("%f\n", out_h[(z * NY + y) * NX + x]);
+    for (int z = 0; z < nz; z++) {
+        for (int y = 0; y < ny; y++) {
+            for (int x = 0; x < nx; x++) {
+                printf("%f\n", out_h[(z * ny + y) * nx + x]);
             }
         }
     }
 
-    hipFree(in_d);
-    hipFree(out_d);
+    HIP_CHECK(hipFree(in_d));
+    HIP_CHECK(hipFree(out_d));
     free(in_h);
     free(out_h);
 

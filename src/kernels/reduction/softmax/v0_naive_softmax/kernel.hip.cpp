@@ -24,13 +24,13 @@ __device__ float waveReduceMax(float val) {
     return val;
 }
 
-__global__ void softmax_kernel(float* input, float* output) {
+__global__ void softmaxKernel(float* input, float* output) {
     __shared__ float shared_sums[8];
     __shared__ float shared_max[8];
 
     int tid = threadIdx.x;
-    int laneId = threadIdx.x % 32;
-    int wfId = threadIdx.x / 32;
+    int lane_id = threadIdx.x % 32;
+    int wf_id = threadIdx.x / 32;
     
     float val = input[tid];
 
@@ -38,75 +38,75 @@ __global__ void softmax_kernel(float* input, float* output) {
     float max = waveReduceMax(val);
 
     // one thread from each wavefront is resonsible for writing to LDS
-    if (laneId == 0) {
-        shared_max[wfId] = max;
+    if (lane_id == 0) {
+        shared_max[wf_id] = max;
     }
 
     __syncthreads();
 
-    float blockMax = 0.0f;
+    float block_max = 0.0f;
 
     // now that all wavefronts have written their max, find the max amongst the wavefronts
-    if (wfId == 0) {
-        blockMax = (laneId < 8) ? shared_max[laneId] : -__FLT_MAX__;
+    if (wf_id == 0) {
+        block_max = (lane_id < 8) ? shared_max[lane_id] : -__FLT_MAX__;
 
-        blockMax = waveReduceMax(blockMax);
+        block_max = waveReduceMax(block_max);
 
-        if (laneId == 0) {
-            shared_max[0] = blockMax;
+        if (lane_id == 0) {
+            shared_max[0] = block_max;
         }
     }
 
     __syncthreads();
 
-    float globalMax = shared_max[0];
+    float global_max = shared_max[0];
 
     // the max is needed for the expf calculation
-    float expf_val = expf(val - globalMax);
+    float expf_val = expf(val - global_max);
 
     // calculate the sum for the wavefront using shuffling
     float sum = waveReduceSum(expf_val); 
     
     // one thread from each wavefront is resonsible for writing to LDS
-    if (laneId == 0) {
-        shared_sums[wfId] = sum;
+    if (lane_id == 0) {
+        shared_sums[wf_id] = sum;
     }
     
     __syncthreads();
 
-    float blockSum = 0.0f;
+    float block_sum = 0.0f;
 
     // now that all wavefronts have written their sum, find the sum of sums
-    if (wfId == 0) {
+    if (wf_id == 0) {
         /*
             ensure all threads in the wavefront participate. in general, we don't
             want to allow threads to retrieve data from non-executing threads
             
             and adding 0 to the blockSum doesnt change our answer
         */
-        blockSum = (laneId < 8) ? shared_sums[laneId] : 0.0f;
+        block_sum = (lane_id < 8) ? shared_sums[lane_id] : 0.0f;
 
-        blockSum = waveReduceSum(blockSum);
+        block_sum = waveReduceSum(block_sum);
 
-        if (laneId == 0) {
-            shared_sums[0] = blockSum;
+        if (lane_id == 0) {
+            shared_sums[0] = block_sum;
         }
     }
 
     __syncthreads();
 
-    float globalSum = shared_sums[0];
+    float global_sum = shared_sums[0];
 
     // the answer for each thread
-    output[tid] = expf_val / globalSum;
+    output[tid] = expf_val / global_sum;
 }
 
 int main() {
-    int N = 256;
-    size_t bytes = N * sizeof(float);
+    int n = 256;
+    size_t bytes = n * sizeof(float);
 
-    std::vector<float> h_in(N, 1.0f); // Input: all 1s
-    std::vector<float> h_out(N);
+    std::vector<float> h_in(n, 1.0f); // Input: all 1s
+    std::vector<float> h_out(n);
 
     float *d_in, *d_out;
     HIP_CHECK(hipMalloc(&d_in, bytes));
@@ -114,7 +114,7 @@ int main() {
 
     HIP_CHECK(hipMemcpy(d_in, h_in.data(), bytes, hipMemcpyHostToDevice));
 
-    hipLaunchKernelGGL(softmax_kernel, dim3(1), dim3(256), 0, 0, d_in, d_out);
+    hipLaunchKernelGGL(softmaxKernel, dim3(1), dim3(256), 0, 0, d_in, d_out);
     HIP_KERNEL_CHECK();
 
     HIP_CHECK(hipMemcpy(h_out.data(), d_out, bytes, hipMemcpyDeviceToHost));

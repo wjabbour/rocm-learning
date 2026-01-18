@@ -1,11 +1,10 @@
 #include <hip/hip_runtime.h>
 #include "utils/random_int.hpp"
 #include "utils/hip_check.hpp"
-#include "utils/hip_check.hpp"
 
 #define BLOCK_SIZE 512
 
-__global__ void block_reduction(int* in, int* out, size_t N) {
+__global__ void blockReduction(int* in, int* out, size_t n) {
     __shared__ float wavefront[8];
 
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
@@ -15,18 +14,15 @@ __global__ void block_reduction(int* in, int* out, size_t N) {
         the first wavefront of the block will write the final value to global memory. This 
         choice is arbitrary: any wavefront is capable of this step.
     */ 
-    int wfId = blockIdx / 32;
+    int wf_id = blockIdx.x / 32;
     // the thread at lane 0 will hold the final value from our wave-shuffle reduction
-    int laneId = threadIdx.x % 32;
+    int lane_id = threadIdx.x % 32;
 
     // load data from global memory, contiguous threads access contiguous memory
     int data = in[tid];
 
     // sum all values in the wavefront
-    size_t waveSum = waveReduceSum(data);
-
-
-    
+    size_t wave_sum = waveReduceSum(data);
 }
 
 int main() {
@@ -36,22 +32,22 @@ int main() {
 
     HIP_CHECK(hipEventRecord(sys_start, 0));
 
-    size_t N = 1ULL << 31;
-    size_t inputBytes = N * sizeof(int);
+    size_t n = 1ULL << 31;
+    size_t input_bytes = n * sizeof(int);
 
     // each block will produce a single output value, so our initial output size is equal to the number of blocks launched
-    size_t outputElements = (N + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    size_t outputBytes = outputElements * sizeof(int);
+    size_t output_elements = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    size_t output_bytes = output_elements * sizeof(int);
     
     // allocate host memory
     int *in_d, *out_d;
-    int *in_h = (int*)malloc(inputBytes);
+    int *in_h = (int*)malloc(input_bytes);
     if (in_h == NULL) {
         printf("Input array host memory allocation failed\n");
         exit(1);
     }
 
-    int* out_h = (int*)calloc(outputElements, sizeof(int));
+    int* out_h = (int*)calloc(output_elements, sizeof(int));
     if (out_h == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
@@ -60,23 +56,23 @@ int main() {
     printf("Allocated input and output arrays\n");
 
     // allocate device memory
-    HIP_CHECK(hipMalloc(&in_d, inputBytes));
-    HIP_CHECK(hipMalloc(&out_d, outputBytes));
+    HIP_CHECK(hipMalloc(&in_d, input_bytes));
+    HIP_CHECK(hipMalloc(&out_d, output_bytes));
 
     printf("Allocated device arrays\n");
 
     // initialize host memory
-    for (size_t i = 0; i < N; i++) {
+    for (size_t i = 0; i < n; i++) {
         in_h[i] = Utils::Random::int_in_range(1, 1);
     }
 
     printf("Populated input array\n");
 
     // host -> device transfer
-    HIP_CHECK(hipMemcpy(in_d, in_h, inputBytes, hipMemcpyHostToDevice));
-    HIP_CHECK(hipMemcpy(out_d, out_h, outputBytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(in_d, in_h, input_bytes, hipMemcpyHostToDevice));
+    HIP_CHECK(hipMemcpy(out_d, out_h, output_bytes, hipMemcpyHostToDevice));
 
-    size_t currentN = N;
+    size_t current_n = n;
 
     hipEvent_t k_start, k_stop;
     HIP_CHECK(hipEventCreate(&k_start));
@@ -85,28 +81,28 @@ int main() {
     float kernel_total_ms = 0.0f;
 
     hipDeviceProp_t prop;
-    hipGetDeviceProperties(&prop, 0);
+    HIP_CHECK(hipGetDeviceProperties(&prop, 0));
 
-    while (currentN > 1) {
-        int outputSize = (currentN + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        int blockCount = (outputSize + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    while (current_n > 1) {
+        int output_size = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        int block_count = (output_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
-        if (size_t(blockCount * BLOCK_SIZE) > (size_t)prop.maxGridSize[0]) {
-            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", blockCount, prop.maxGridSize[0]);
+        if (size_t(block_count * BLOCK_SIZE) > (size_t)prop.maxGridSize[0]) {
+            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
             exit(1);
         }
 
         HIP_CHECK(hipEventRecord(k_start, 0));
 
         hipLaunchKernelGGL(
-            block_reduction,
-            dim3(blockCount),
+            blockReduction,
+            dim3(block_count),
             dim3(BLOCK_SIZE), 
             0,
             0,
             in_d,
             out_d,
-            currentN
+            current_n
         );
         HIP_KERNEL_CHECK();
 
@@ -126,7 +122,7 @@ int main() {
             entirety of the kernel
         */
         std::swap(in_d, out_d);
-        currentN = outputSize;
+        current_n = output_size;
     }
 
     /*
@@ -135,13 +131,13 @@ int main() {
         it just feels "right" to memcpy from device output pointer :) 
     */
     std::swap(in_d, out_d);
-    hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost);
+    HIP_CHECK(hipMemcpy(out_h, out_d, sizeof(int), hipMemcpyDeviceToHost));
 
     // the answer!
     printf("Result: %i\n", out_h[0]);
 
-    hipFree(in_d);
-    hipFree(out_d);
+    HIP_CHECK(hipFree(in_d));
+    HIP_CHECK(hipFree(out_d));
     free(in_h);
     free(out_h);
 
