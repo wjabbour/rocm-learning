@@ -2,7 +2,8 @@
 #include <hip/hip_runtime.h>
 
 // Performs a wavefront-level reduction to compute the sum of 'val' across all threads in the wavefront
-__device__ __forceinline__ float waveReduceSum(float val) {
+template <typename T>
+__device__ __forceinline__ T waveReduceSum(T val) {
     // assumes a wavefront size of 32
     val += __shfl_down(val, 16, 32);
     val += __shfl_down(val, 8, 32);

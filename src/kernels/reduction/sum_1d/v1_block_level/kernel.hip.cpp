@@ -1,6 +1,7 @@
 #include <hip/hip_runtime.h>
 #include "utils/random_int.hpp"
 #include "utils/hip_check.hpp"
+#include "utils/hip_check.hpp"
 
 # define BLOCK_SIZE 512
 
@@ -8,29 +9,9 @@ __global__ void block_reduction(int* in, int* out, size_t N) {
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
 
-    /*
-        our thread must be within N, else we will pull garbage data
-    */
-    if (i < N) {
-        int sum = 0;
-        /*
-            once we know that we are on a thread that is within N, we need to find
-            how many indices to the right (up to WORK_PER_THREAD) are also within N
+    float waveSum = 0.0f;
 
-            we start at the rightmost index (i + WORK_PER_THREAD), walking left until we find that the index is
-            within N and use the inner loop to sum the indices from there to i
-        */
-        for (int j = WORK_PER_THREAD - 1; j >= 0; j--) {
-            if (i + j < N) {
-                for (int k = j; k >= 0; k--) {
-                    sum += in[i + k];
-                }
-                break;
-            }
-        }
-
-        out[tid] = sum;
-    }
+    
 }
 
 int main() {
