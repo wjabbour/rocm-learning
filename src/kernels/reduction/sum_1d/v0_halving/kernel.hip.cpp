@@ -98,7 +98,7 @@ int main() {
         int output_size = (current_n + WORK_PER_THREAD - 1) / WORK_PER_THREAD;
         int block_count = (output_size + block_size - 1) / block_size;
 
-        if (size_t(block_count * block_size) > (size_t)prop.maxGridSize[0]) {
+        if (size_t(block_count) > (size_t)prop.maxGridSize[0]) {
             printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
             exit(1);
         }

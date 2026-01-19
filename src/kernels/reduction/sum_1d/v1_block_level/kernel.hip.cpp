@@ -119,7 +119,7 @@ int main() {
         int block_count = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
         printf("Block count: %i, current_n: %i\n", block_count, current_n);
 
-        if (size_t(block_count * BLOCK_SIZE) > (size_t)prop.maxGridSize[0]) {
+        if (size_t(block_count) > (size_t)prop.maxGridSize[0]) {
             printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
             exit(1);
         }
@@ -153,7 +153,7 @@ int main() {
             entirety of the kernel
         */
         std::swap(d_in, d_out);
-        current_n = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        current_n = block_count;
     }
 
     /*
