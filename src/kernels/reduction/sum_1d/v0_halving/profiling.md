@@ -1,4 +1,4 @@
-# Halving Aggregation Kernel
+# Halving Reduction Kernel
 
 **GPU**: AMD Radeon RX 9070 XT  
 **CPU**: AMD Ryzen 7 9800X3D 8-Core Processor  
@@ -42,7 +42,7 @@ Here are the same counters for the final kernel launches:
 ### Diagnosis
 
 - Kernel launches with small N are contributing a flat amount to the overall reduction runtime.
-- For high N kernels our memory subsystem is active 80% of the time - nearly saturated. We spend all this time waiting on global memory fetches, but the kernel aggregation only decreases the N of the next kernel by half. Therefore, many memory-bound passes are required to perform the aggregation.
+- For high N kernels our memory subsystem is active 80% of the time - nearly saturated. We spend all this time waiting on global memory fetches, but the kernel reduction only decreases the N of the next kernel by half. Therefore, many memory-bound passes are required to perform the reduction.
 
 ### Suggested Improvements
 
@@ -74,7 +74,7 @@ Unfortunately, I recently upgraded to an RDNA 4 card. This card does not have su
 There are two primary improvements I can identify:
 
 1. Vectorized Loads - the kernel is using scalar load instructions, loading individual `int`s from memory at a time. Since we know that in most cases we wish to load multiple `int`s at once, let's try using the `int4` data type to fetch 128 bits at a time. This will reduce the load on the instruction pipeline and increase performance.
-2. Memory Bandwidth - the kernel is performing an excess number of memory writes (and subsequently reads) because the aggregation does not shrink N aggressively enough. We need to use LDS and coordinate all of the wavefronts in a block to aggregate to a single value. Now, each kernel pass will decrease N by a factor of threadsPerBlock.
+2. Memory Bandwidth - the kernel is performing an excess number of memory writes (and subsequently reads) because the reduction does not shrink N aggressively enough. We need to use LDS and coordinate all of the wavefronts in a block to reduce to a single value. Now, each kernel pass will decrease N by a factor of threadsPerBlock.
 
 Since #2 is a different paradigm, I will perform that work in the [block-level kernel reduction](../v1_block_level/kernel.hip.cpp).
 
