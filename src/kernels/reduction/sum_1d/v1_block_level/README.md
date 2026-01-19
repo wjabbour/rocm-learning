@@ -4,7 +4,7 @@ Strategy:
 
 - Algorithm - 
 
-- Execution Model -
+- Execution Model - multi-pass kernel
 
 Bottlenecks:
 

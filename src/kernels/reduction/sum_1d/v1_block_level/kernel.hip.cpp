@@ -3,7 +3,7 @@
 #include "utils/hip_check.hpp"
 #include "utils/wave_utils.hpp"
 
-#define BLOCK_SIZE 1024
+#define BLOCK_SIZE 512
 
 __global__ void blockReduction(int* in, int* out) {
     /*
@@ -47,7 +47,7 @@ __global__ void blockReduction(int* in, int* out) {
     */
     if (wf_id == 0 && lane_id == 0) {
         int block_sum = 0;
-        // when warpSize is 64, ensure we don't attempt to read uninitialized LDS entries
+        // if warpSize is 64, ensure we don't attempt to read uninitialized LDS entries
         int wavefront_count = BLOCK_SIZE / warpSize;
         for (int i = 0; i < wavefront_count; i++) {
             block_sum += wavefront_sums[i];

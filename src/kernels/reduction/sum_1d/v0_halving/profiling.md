@@ -1,6 +1,9 @@
 # Halving Reduction Kernel
 
-**GPU**: AMD Radeon RX 9070 XT  
+**GPU**: AMD Radeon RX 9070 XT
+
+- Memory Bandwidth: Up to 640 GB/s
+
 **CPU**: AMD Ryzen 7 9800X3D 8-Core Processor  
 **Wavefront Size**: 32  
 **ROCm version**: 7.1.0  
@@ -13,7 +16,7 @@
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
-| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 31%                      |
 
 ### Description
 
@@ -58,8 +61,8 @@ We need to increase the per-thread workload. Let's make that a configurable valu
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
-| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
-| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 83%                      |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 31%                      |
+| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 73%                      |
 
 ### Description
 
@@ -84,13 +87,13 @@ Since #2 is a different paradigm, I will perform that work in the [block-level k
 
 | Implementation | Kernel Time (μs) | System Time (ms) | N    | Kernel Speedup vs v1 | System Speedup vs v1 | Bandwidth Efficiency (%) |
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
-| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 48%                      |
-| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 83%                      |
-| **v3**         | 18,428           | 6,962            | 2^31 | 0.0x faster          | 0.0x faster          | 83%                      |
+| **v1**         | 42,699           | 7,120            | 2^31 | -                    | -                    | 31%                      |
+| **v2**         | 18,276           | 6,825            | 2^31 | 2.34x faster         | 1.04x faster         | 73%                      |
+| **v3**         | 18,428           | 6,962            | 2^31 | 0.0x faster          | 0.0x faster          | 73%                      |
 
 ### Description
 
-I implemented vectorized loads in the kernel. 
+I implemented vectorized loads in the kernel.
 
 ### Profiling Observations
 
@@ -98,4 +101,4 @@ The runtime was not substantially different. Either the memory system or the com
 
 ### Suggested Improvements
 
-Let's move forward with the [block-level reduction](../v1_block_level/kernel.hip.cpp). 
+Let's move forward with the [block-level reduction](../v1_block_level/kernel.hip.cpp).
