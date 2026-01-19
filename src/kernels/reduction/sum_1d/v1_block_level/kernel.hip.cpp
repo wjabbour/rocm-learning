@@ -3,9 +3,9 @@
 #include "utils/hip_check.hpp"
 #include "utils/wave_utils.hpp"
 
-#define BLOCK_SIZE 512
+#define BLOCK_SIZE 1024
 
-__global__ void blockReduction(int* in, int* out, size_t n) {
+__global__ void blockReduction(int* in, int* out) {
     /*
         each wavefront will write one element to LDS
         
@@ -64,14 +64,13 @@ int main() {
 
     HIP_CHECK(hipEventRecord(sys_start, 0));
 
-    //size_t n = 1ULL << 31;
-    size_t n = 1<<10;
+    size_t n = 1ULL << 31;
     size_t input_bytes = n * sizeof(int);
 
     // each block will produce a single output value, so our initial output size is equal to the number of blocks launched
     size_t output_elements = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     size_t output_bytes = output_elements * sizeof(int);
-    
+
     // allocate host memory
     int *d_in, *d_out;
     int *h_in = (int*)malloc(input_bytes);
@@ -117,8 +116,8 @@ int main() {
     HIP_CHECK(hipGetDeviceProperties(&prop, 0));
 
     while (current_n > 1) {
-        int output_size = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        int block_count = (output_size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        int block_count = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
+        printf("Block count: %i, current_n: %i\n", block_count, current_n);
 
         if (size_t(block_count * BLOCK_SIZE) > (size_t)prop.maxGridSize[0]) {
             printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
@@ -134,8 +133,7 @@ int main() {
             0,
             0,
             d_in,
-            d_out,
-            current_n
+            d_out
         );
         HIP_KERNEL_CHECK();
 
@@ -155,7 +153,7 @@ int main() {
             entirety of the kernel
         */
         std::swap(d_in, d_out);
-        current_n = output_size;
+        current_n = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     }
 
     /*
