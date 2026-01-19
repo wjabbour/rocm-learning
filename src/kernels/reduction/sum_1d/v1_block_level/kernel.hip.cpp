@@ -1,11 +1,19 @@
 #include <hip/hip_runtime.h>
 #include "utils/random_int.hpp"
 #include "utils/hip_check.hpp"
+#include "utils/wave_utils.hpp"
 
 #define BLOCK_SIZE 512
 
 __global__ void blockReduction(int* in, int* out, size_t n) {
-    __shared__ float wavefront[8];
+    /*
+        each wavefront will write one element to LDS
+        
+        we cannot use warpSize here since variables cannot be used for memory allocation.
+        However, the code is still functionally correct on systems with wavefronts of size 64,
+        we will just be over allocating LDS.
+    */
+    __shared__ float wavefront_sums[BLOCK_SIZE / 32];
 
     // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
     size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
@@ -14,15 +22,39 @@ __global__ void blockReduction(int* in, int* out, size_t n) {
         the first wavefront of the block will write the final value to global memory. This 
         choice is arbitrary: any wavefront is capable of this step.
     */ 
-    int wf_id = blockIdx.x / 32;
+    int wf_id = threadIdx.x / warpSize;
     // the thread at lane 0 will hold the final value from our wave-shuffle reduction
-    int lane_id = threadIdx.x % 32;
+    int lane_id = threadIdx.x % warpSize;
 
     // load data from global memory, contiguous threads access contiguous memory
     int data = in[tid];
 
     // sum all values in the wavefront
     size_t wave_sum = waveReduceSum(data);
+
+    // one thread from each wavefront writes the wavefront sum to LDS
+    if (lane_id == 0) {
+        wavefront_sums[wf_id] = wave_sum;
+    }
+
+    // ensure all wavefronts have written their values to LDS before proceeding
+    __syncthreads();
+
+    /*
+        now we need a thread to sum the sums in LDS and write to global memory
+
+        any thread could do this, but I'm choosing the first thread in the grid
+    */
+    if (wf_id == 0 && lane_id == 0) {
+        int block_sum = 0;
+        // when warpSize is 64, ensure we don't attempt to read uninitialized LDS entries
+        int wavefront_count = BLOCK_SIZE / warpSize;
+        for (int i = 0; i < wavefront_count; i++) {
+            block_sum += wavefront_sums[i];
+        }
+
+        out[blockIdx.x] = block_sum;
+    }
 }
 
 int main() {
@@ -32,7 +64,8 @@ int main() {
 
     HIP_CHECK(hipEventRecord(sys_start, 0));
 
-    size_t n = 1ULL << 31;
+    //size_t n = 1ULL << 31;
+    size_t n = 1<<10;
     size_t input_bytes = n * sizeof(int);
 
     // each block will produce a single output value, so our initial output size is equal to the number of blocks launched

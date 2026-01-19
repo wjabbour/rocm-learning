@@ -18,3 +18,5 @@ make clean && make run SRC=src/kernels/reduction/sum_1d/v1_block_level/kernel.hi
 
 - Use `size_t` instead of `int` when declaring the global thread id if you plan to launch more than 2^32-1 threads, else you will encounter integer overflow which will affect the correctness of the kernel.
 
+- HIP exposes the `warpSize` built-in device variable which detects the hardware's warp size. This can be used to increase kernel portability.
+
