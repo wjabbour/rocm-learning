@@ -34,7 +34,7 @@ The profiling counters for these large-N passes show:
 - MemUnitBusy ≈ 80% → strongly memory-bound
 - Linear runtime scaling with N → bandwidth-limited
 
-There is a flat fee to launch a kernel (scheduling, allocation, register allocation). Once N/2 = k becomes sufficiently small, our kernel launches are bottlenecked by this flat fee. e.g. the kernel duration for N = 128 is roughly equal to the kernel duration for N = 64 or N = 256. This flat fee dominates the runtime of the kernel launches with small N.
+There is a flat fee to launch a kernel: CPU DMA to GPU over PCIe to send kernel information like LDS and register usage, GPU hardware scheduler must see this command and coordinate across the CUs, and finally hardware allocation. Once N/2 = k becomes sufficiently small, our kernel launches are bottlenecked by this flat fee. e.g. the kernel duration for N = 128 is roughly equal to the kernel duration for N = 64 or N = 256. This flat fee dominates the runtime of the kernel launches with small N.
 
 Here are the same counters for the final kernel launches:
 
