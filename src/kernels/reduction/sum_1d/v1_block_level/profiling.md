@@ -20,9 +20,9 @@
 
 ### Description
 
-- 1
-- 2
-- 3
+The baseline implementation involves the host copying over N elements to the device, the host launches a kernel with a thread for each element in N, each thread finds its global index in the grid and requests that index from global memory, each wavefront of each block participates in a wave-shuffle to sum all of the values for that wavefront, one thread from each wavefront is responsible for writing that wavefront's sum to LDS, all threads in the block synchronize, one thread from each block sums the wavefront sums from its respective block and writes to global output.
+
+At this point, N has been reduced by a factor of `N / block_size`. A new kernel is launched to process this smaller input. The reduction is complete once the output size is 1.
 
 ### Profiling Observations
 
