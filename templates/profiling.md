@@ -2,7 +2,7 @@
 
 **GPU**: AMD Radeon RX 9070 XT  
 - Memory Bandwidth: Up to 640 GB/s 
- 
+
 **CPU**: AMD Ryzen 7 9800X3D 8-Core Processor  
 **Wavefront Size**: 32  
 **ROCm version**: 7.1.0  
@@ -18,10 +18,6 @@
 | **v1**         | 1                | 1                | 100 | -                    | -                    |
 
 ### Description
-
-- 1
-- 2
-- 3
 
 ### Profiling Observations
 

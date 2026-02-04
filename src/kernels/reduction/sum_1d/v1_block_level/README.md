@@ -20,3 +20,4 @@ make clean && make run SRC=src/kernels/reduction/sum_1d/v1_block_level/kernel.hi
 
 - HIP exposes the `warpSize` built-in device variable which detects the hardware's warp size. This can be used to increase kernel portability.
 
+- The notion that each CU has its own LDS and 

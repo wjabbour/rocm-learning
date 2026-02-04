@@ -5,7 +5,7 @@
 
 #define BLOCK_SIZE 512
 
-__global__ void blockReduction(int* in, int* out) {
+__global__ void blockReduction(int* in, int* out, size_t n, int num_blocks) {
     /*
         each wavefront will write one element to LDS
         
@@ -13,10 +13,15 @@ __global__ void blockReduction(int* in, int* out) {
         However, the code is still functionally correct on systems with wavefronts of size 64,
         we will just be over allocating LDS.
     */
-    __shared__ float wavefront_sums[BLOCK_SIZE / 32];
+    __shared__ size_t wavefront_sums[BLOCK_SIZE / 32];
 
-    // we may launch more than 2^32 threads, so we need to use size_t for our global thread ID
-    size_t tid = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    /*
+        each block processes a chunk of the input
+        calculate the starting position and chunk size for this block
+    */
+    size_t chunk_size = (n + num_blocks - 1) / num_blocks;
+    size_t block_start = (size_t)blockIdx.x * chunk_size;
+    size_t block_end = (block_start + chunk_size < n) ? (block_start + chunk_size) : n;
 
     /*
         the first wavefront of the block will write the final value to global memory. This 
@@ -26,11 +31,14 @@ __global__ void blockReduction(int* in, int* out) {
     // the thread at lane 0 will hold the final value from our wave-shuffle reduction
     int lane_id = threadIdx.x % warpSize;
 
-    // load data from global memory, contiguous threads access contiguous memory
-    int data = in[tid];
+    // each thread strides through the block's chunk of the input
+    size_t thread_sum = 0;
+    for (size_t i = block_start + threadIdx.x; i < block_end; i += blockDim.x) {
+        thread_sum += in[i];
+    }
 
     // sum all values in the wavefront
-    size_t wave_sum = waveReduceSum(data);
+    size_t wave_sum = waveReduceSum(thread_sum);
 
     // one thread from each wavefront writes the wavefront sum to LDS
     if (lane_id == 0) {
@@ -43,7 +51,7 @@ __global__ void blockReduction(int* in, int* out) {
     /*
         now we need a thread to sum the sums in LDS and write to global memory
 
-        any thread could do this, but I'm choosing the first thread in the grid
+        any thread could do this, but I'm choosing the first thread in the block
     */
     if (wf_id == 0 && lane_id == 0) {
         int block_sum = 0;
@@ -67,9 +75,9 @@ int main() {
     size_t n = 1ULL << 31;
     size_t input_bytes = n * sizeof(int);
 
-    // each block will produce a single output value, so our initial output size is equal to the number of blocks launched
-    size_t output_elements = (n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    size_t output_bytes = output_elements * sizeof(int);
+    // configurable number of blocks to launch
+    int num_blocks = 512;
+    size_t output_bytes = num_blocks * sizeof(int);
 
     // allocate host memory
     int *d_in, *d_out;
@@ -79,7 +87,7 @@ int main() {
         exit(1);
     }
 
-    int* h_out = (int*)calloc(output_elements, sizeof(int));
+    int* h_out = (int*)calloc(num_blocks, sizeof(int));
     if (h_out == NULL) {
         printf("Output array host memory allocation failed\n");
         exit(1);
@@ -104,68 +112,56 @@ int main() {
     HIP_CHECK(hipMemcpy(d_in, h_in, input_bytes, hipMemcpyHostToDevice));
     HIP_CHECK(hipMemcpy(d_out, h_out, output_bytes, hipMemcpyHostToDevice));
 
-    size_t current_n = n;
-
     hipEvent_t k_start, k_stop;
     HIP_CHECK(hipEventCreate(&k_start));
     HIP_CHECK(hipEventCreate(&k_stop));
 
-    float kernel_total_ms = 0.0f;
-
     hipDeviceProp_t prop;
     HIP_CHECK(hipGetDeviceProperties(&prop, 0));
 
-    while (current_n > 1) {
-        int block_count = (current_n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        printf("Block count: %i, current_n: %i\n", block_count, current_n);
-
-        if (size_t(block_count) > (size_t)prop.maxGridSize[0]) {
-            printf("CRITICAL ERROR: Needed %lu blocks, but GPU Max is %d\n", block_count, prop.maxGridSize[0]);
-            exit(1);
-        }
-
-        HIP_CHECK(hipEventRecord(k_start, 0));
-
-        hipLaunchKernelGGL(
-            blockReduction,
-            dim3(block_count),
-            dim3(BLOCK_SIZE), 
-            0,
-            0,
-            d_in,
-            d_out
-        );
-        HIP_KERNEL_CHECK();
-
-        HIP_CHECK(hipEventRecord(k_stop, 0));
-        HIP_CHECK(hipEventSynchronize(k_stop));
-
-        float k_μs = 0.0f;
-        HIP_CHECK(hipEventElapsedTime(&k_μs , k_start, k_stop));
-        kernel_total_ms += k_μs;
-
-        HIP_CHECK(hipDeviceSynchronize());
-
-        /*
-            ping pong buffering
-
-            we alloc two fixed size buffers of data that we use throughout the 
-            entirety of the kernel
-        */
-        std::swap(d_in, d_out);
-        current_n = block_count;
+    if (size_t(num_blocks) > (size_t)prop.maxGridSize[0]) {
+        printf("CRITICAL ERROR: Needed %d blocks, but GPU Max is %d\n", num_blocks, prop.maxGridSize[0]);
+        exit(1);
     }
 
-    /*
-        since we swap the pointers after every kernel launch, d_in will
-        always hold the most recent output data. I swap once more here because
-        it just feels "right" to memcpy from device output pointer :) 
-    */
-    std::swap(d_in, d_out);
-    HIP_CHECK(hipMemcpy(h_out, d_out, sizeof(int), hipMemcpyDeviceToHost));
+    printf("Launching %d blocks to process %lu elements\n", num_blocks, n);
+
+    HIP_CHECK(hipEventRecord(k_start, 0));
+
+    hipLaunchKernelGGL(
+        blockReduction,
+        dim3(num_blocks),
+        dim3(BLOCK_SIZE), 
+        0,
+        0,
+        d_in,
+        d_out,
+        n,
+        num_blocks
+    );
+    HIP_KERNEL_CHECK();
+
+    HIP_CHECK(hipEventRecord(k_stop, 0));
+    HIP_CHECK(hipEventSynchronize(k_stop));
+
+    float kernel_total_ms = 0.0f;
+    float k_μs = 0.0f;
+    HIP_CHECK(hipEventElapsedTime(&k_μs , k_start, k_stop));
+    kernel_total_ms = k_μs;
+
+    HIP_CHECK(hipDeviceSynchronize());
+
+    // copy results back
+    HIP_CHECK(hipMemcpy(h_out, d_out, output_bytes, hipMemcpyDeviceToHost));
+
+    // sum the partial results from each block
+    int final_sum = 0;
+    for (int i = 0; i < num_blocks; i++) {
+        final_sum += h_out[i];
+    }
 
     // the answer!
-    printf("Result: %i\n", h_out[0]);
+    printf("Result: %i\n", final_sum);
 
     HIP_CHECK(hipFree(d_in));
     HIP_CHECK(hipFree(d_out));
