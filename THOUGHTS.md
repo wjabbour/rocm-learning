@@ -1,5 +1,9 @@
 # Daily Thought
 
+## 2/5/2025
+
+It is greatly underestimated how close we currently are to replacing most non-physical human jobs.
+
 ## 12/13/2025
 
 To create artificial intelligence, it's helpful to create computational systems in the spirit of biological systems.
