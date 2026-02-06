@@ -28,12 +28,11 @@ At this point, N has been reduced by a factor of `N / block_size`. A new kernel 
 
 Still having trouble collecting PMCs on my current setup.
 
-
 ### Diagnosis
 
 I was definitely expecting this to have a faster execution time than the halving kernel out of the gate since we greatly reduced the amount of writes to global memory by having our intermediate sums written and read to LDS. I suspect that there are two large pitfalls with this implementation when compared to the optimized halving approach:
 
-1) The halving kernel uses a configurable WORK_PER_THREAD variable which determines how many elements from global memory each thread is responsible for summing. As this number increases the arithmetic intensity of the thread increases and the fixed fee of wavefront scheduling is amortized as wavefronts can stay resident on CUs for longer. This block reduction is only processing one element per thread.
+1) The halving kernel uses a configurable WORK_PER_THREAD variable which determines how many elements from global memory each thread is responsible for summing. As this number increases the arithmetic intensity of the thread increases and the fixed fee of wavefront scheduling is amortized as wavefronts can stay resident on CUs for longer. Whereas, this block reduction is only processing one element per thread.
 2) Closely related to the first point, we are paying high costs for scheduling overhead and treating our threads as dispensable global data fetchers. Since this kernel is inherently memory bound, we are better off launching a fixed number of threads and performing all compute on those threads only, drastically reducing any scheduling overhead.
 
 ### Suggested Improvements
@@ -48,3 +47,9 @@ Let's implement a grid-stride loop. We will launch a fixed number of blocks whic
 | -------------- | ---------------- | ---------------- | ---- | -------------------- | -------------------- | ------------------------ |
 | **v1**         | 27,502           | 6,607            | 2^31 | -                    | -                    | 49%                      |
 | **v2**         | 15,876           | 6,725            | 2^31 | 1.73x faster         | 0.98x (slower)         | 84%                      |
+
+## Profiling Observations
+
+This is the fastest I've processed 2^31 ints so far - something to celebrate!
+
+The kernel is approaching the theoretical memory bandwidth capacity of the card. I feel good about with how I have improved the kernel so far and will move on for now.

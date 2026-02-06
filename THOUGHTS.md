@@ -10,7 +10,7 @@ To create artificial intelligence, it's helpful to create computational systems 
 
 For example, we associate some importance with our memories which dictates how quickly we can recall, and for how long we can retain those memories.
 
-If we can apply a similar idea to LLMs, we could increase the usefulness of the context window.
+If we can apply a similar idea to LLMs, we could increase the usefulness of the context window, decreasing its average size.
 
 Edit: this idea already exists. I need to take a look at [this article.](https://arxiv.org/abs/2310.08560#:~:text=Large%20language%20models%20(LLMs)%20have,Comments:)
 

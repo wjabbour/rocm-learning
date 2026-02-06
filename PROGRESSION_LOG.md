@@ -1,4 +1,9 @@
-## 12/31/2025 - Halving Kernel Profiling Writeup
+## 2/5/2025 - Halving Kernel V1 Profiling Writeup
+[source](src/kernels/reduction/sum_1d/v1_block_level/profiling.md)
+
+Improved the 1D reduction by using LDS and a grid-stride loop to achieve 84% of theoretical memory bandwidth.
+
+## 12/31/2025 - Halving Kernel V0 Profiling Writeup
 
 [source](src/kernels/reduction/sum_1d/v0_halving/profiling.md)
 
