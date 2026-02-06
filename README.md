@@ -1,3 +1,11 @@
+# Currently Working On
+
+I was excited to begin learning Triton, but AMD's nightly builds of ROCm/Pytorch don't support my GPU architecture just yet. For now, I will delve into quantization. 
+
+I just finished the writeup for my [block-level reduction](src/kernels/reduction/sum_1d/v1_block_level/profiling.md).
+
+[Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
+
 # About Me
 
 Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
@@ -11,14 +19,6 @@ There are three important directories:
 - [topics](topics) - I dive deep into some specific topic.
 
 My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU software stack, with a focus on high-performance inference.
-
-# Currently Working On
-
-I'm currently learning about Triton.
-
-I just finished the writeup for my [block-level reduction](src/kernels/reduction/sum_1d/v1_block_level/profiling.md).
-
-[Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
 
 # Scheduled Learning
 
