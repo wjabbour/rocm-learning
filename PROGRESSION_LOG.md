@@ -1,4 +1,11 @@
+##2/7/2025 - Finish HBM topic
+
+[source](topics/01_hbm.md)
+
+Finished my first topic writeup on HBM: what is it? what's the difference between CPU and GPU memory? how does it relate to inference?
+
 ## 2/5/2025 - Halving Kernel V1 Profiling Writeup
+
 [source](src/kernels/reduction/sum_1d/v1_block_level/profiling.md)
 
 Improved the 1D reduction by using LDS and a grid-stride loop to achieve 84% of theoretical memory bandwidth.

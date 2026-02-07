@@ -1,5 +1,3 @@
-![WIP](https://img.shields.io/badge/status-WIP-yellow)
-
 # High Bandwidth Memory
 
 HBM is a specialized form of DRAM which sits physically inside the GPU package, acting as the RAM of the GPU. It's design is fundamentally different from CPU RAM due to the difference in how CPUs and GPUs access memory.
@@ -57,6 +55,26 @@ There are two primary problems to solve:
 
 ### Distance
 
+Instead of placing the memory on the other side of a PCB, let's place the memory directly next to the GPU die. Since the electrical signal only needs to travel a few millimeters, we don't need long copper traces anymore; we can use microscopic, silicon interposers. This directly reduces capacitance and resistance, improving the power consumption and signal integrity of the system.
+
+Additionally, traditional DIMMs are laid out horizontally. The farthest memory cell from the centralized memory controller is on the order of centimeters. To decrease the total distance that the signal needs to travel, we should attempt to reduce this within-memory distance as well.
+
+Let's stack the DRAM chips on top of one another and connect them with microscopic copper poles, called Through-Silicon Vias (TSVs). This greatly reduces the physical distance that the signal must travel from the farthest memory cell to the memory controller.
+
 ### Width
 
+DIMMs are built to transfer 64-bits per clock cycle at a high frequency. Instead, let's transfer 512 or 1024 bits per clock cycle at a lower frequency, but still high enough to have a much higher theoretical bandwidth than a traditional DIMM.
+
 ## The Inference Connection
+
+Workloads are broadly classified into "Compute Bound" and "Memory Bound". The decoding portion of the inference pipeline, the part where the model generates the tokens of the response, is memory bound. This is due to the auto-regressive nature of text generation: token N must use tokens 0 through (N-1) as input. For each token generated, the entire models weights must be loaded from VRAM onto the compute units.
+
+Therefore, the theoretical maximum memory bandwidth of the GPU puts a hard cap on the amount of tokens that can be generated per second during the decoding phase.
+
+## What's Next?
+
+To improve inference speed, we need to improve the rate at which the data we need can be moved to the place we need it. For this broad goal we have at least a few levers:
+
+- Compression: decrease the amount of data we need to move across the memory bus, perform computation to inflate.
+- Quantization: like compression, decrease the amount of data we need to move because we don't need high accuracy for all workloads.
+- Hardware/Software Integration: minimize the duplication of weight data movement across token generation steps.
