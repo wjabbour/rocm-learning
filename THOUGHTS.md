@@ -1,6 +1,10 @@
-# Daily Thought
+# Thoughts
 
-## 2/5/2025
+## 2/12/2026
+
+In the past, computers were as large as rooms and people were relegated slices of time on that shared resource; but now we all have phones in our pocket. Right now, I'm paying $20 a month for a Gemini subscription.
+
+## 2/5/2026
 
 It is greatly underestimated how close we currently are to replacing most non-physical human jobs.
 
