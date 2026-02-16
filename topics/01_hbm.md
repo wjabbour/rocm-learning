@@ -35,9 +35,12 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
 
 - Signal Integrity
 
-  The farther electrons have to travel, the harder they need to be "pushed" along the physical medium to produce waves with enough amplitude differential between "0" and "1" to be easily discernible by the receiver. 
+  The farther electrons have to travel, the harder they need to be "pushed" along the physical medium to produce waves with enough amplitude differential between "0" and "1" to be easily discernible by the receiver.
   
-  Additionally, capacitance is proportional to the length of the medium. For the producer to drive the signal high (to a "1") at the receiver, the electricity needs to flow along the physical medium, like water flowing through a hose before it reaches the tip and waters your garden. This requires time and energy.
+  Additionally, every physical medium has a property called capacitance, which measures that medium's ability to store electrical charge. In the context of signal integrity, a medium with high capacitance causes two large problems:
+
+  1) it increases the latency of the electrical signal transfer between the sender and receiver
+  2) the voltage at the receiver drains more slowly, putting a hard cap on the frequency that signals can be sent across the medium. If a signal is sent before the previous signal has drained to a sufficient level, the receiver's voltage graph won't clearly disambiguate the end of the previous signal and the start of the current one.
 
 The core issue is that DIMMs are designed to move relatively small amounts of data at a high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
 
