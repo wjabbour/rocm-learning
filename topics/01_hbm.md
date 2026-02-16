@@ -35,7 +35,7 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
 
 - Signal Integrity
 
-  The farther electrons have to travel, the harder they need to be "pushed" along the physical medium to produce waves with enough amplitude differential between "0" and "1" to be easily discernible by the consuming system. 
+  The farther electrons have to travel, the harder they need to be "pushed" along the physical medium to produce waves with enough amplitude differential between "0" and "1" to be easily discernible by the receiver. 
   
   Additionally, capacitance is proportional to the length of the medium. For the producer to drive the signal high (to a "1") at the receiver, the electricity needs to flow along the physical medium, like water flowing through a hose before it reaches the tip and waters your garden. This requires time and energy.
 
