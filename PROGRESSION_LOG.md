@@ -1,4 +1,4 @@
-##2/7/2025 - Finish HBM topic
+## 2/7/2025 - Finish HBM topic
 
 [source](topics/01_hbm.md)
 
