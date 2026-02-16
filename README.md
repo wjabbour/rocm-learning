@@ -9,7 +9,7 @@ My secondary current focus is on further digging into ROCm and HIP, focusing on 
 
 # About Me
 
-Hi, I’m Turner Jabbour. I’ve been a software engineer for ~6 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
+Hi, I’m Turner Jabbour. I’ve been a software engineer for ~7 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
 This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
