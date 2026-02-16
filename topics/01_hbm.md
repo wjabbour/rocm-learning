@@ -1,6 +1,6 @@
 # High Bandwidth Memory
 
-HBM is a specialized form of DRAM which sits physically inside the GPU package, acting as the RAM of the GPU. It's design is fundamentally different from CPU RAM due to the difference in how CPUs and GPUs access memory.
+HBM is a specialized form of DRAM which sits physically inside the GPU package, acting as the RAM of the GPU. Its design is fundamentally different from CPU RAM due to the difference in how CPUs and GPUs access memory.
 
 ## CPU vs GPU
 
