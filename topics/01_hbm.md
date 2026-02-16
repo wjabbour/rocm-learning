@@ -23,7 +23,7 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
   Every bit transferred between the DIMM and the CPU requires its own copper trace. The DIMM must also transfer additional control, clock, and address information each requiring their own traces. This means that for a DIMM to transfer 64 bits per clock cycle, there must be **well over 100 copper traces between the DIMM slot and the CPU.** We cannot decrease the width of these traces past a certain bound because:
 
   1) it's difficult to engineer
-  2) as the cross-sectional area of a conductor decreases, the resistance increases and the voltage decreases. We would need to "push" the electrons much harder in order for the receiver to see a "1" or "0".
+  2) as the cross-sectional area of a conductor decreases, the resistance increases which directly decreases voltage measured at the receiver. We would need to "push" the electrons much harder in order for the receiver to see a "1" or "0".
 
 - The "Power Wall"
 
