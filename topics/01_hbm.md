@@ -70,13 +70,13 @@ DIMMs are built to transfer 64-bits per clock cycle at a high frequency. Instead
 
 ## The Inference Connection
 
-Workloads are broadly classified into "Compute Bound" and "Memory Bound". The decoding portion of the inference pipeline, the part where the model generates the tokens of the response, is memory bound. This is due to the auto-regressive nature of text generation: token N must use tokens 0 through (N-1) as input. For each token generated, the entire models weights must be loaded from VRAM onto the compute units.
+Workloads are broadly classified into "Compute Bound" and "Memory Bound". The decoding portion of the inference pipeline, the part where the model generates the tokens of the response, is memory bound. This is due to the auto-regressive nature of text generation: token N must use tokens 0 through (N-1) as input. For each token generated, the entire model's weights must be loaded from VRAM onto the compute units.
 
 Therefore, the theoretical maximum memory bandwidth of the GPU puts a hard cap on the amount of tokens that can be generated per second during the decoding phase.
 
 ## What's Next?
 
-To improve inference speed, we need to improve the rate at which the data we need can be moved to the place we need it. For this broad goal we have at least a few levers:
+To improve inference speed, we need to improve the rate at which the data we need can be moved to the place where we need it. For this broad goal we have at least a few levers:
 
 - Compression: decrease the amount of data we need to move across the memory bus, perform computation to inflate.
 - Quantization: like compression, decrease the amount of data we need to move because we don't need high accuracy for all workloads.
