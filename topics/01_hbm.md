@@ -22,8 +22,8 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
 
   Every bit transferred between the DIMM and the CPU requires its own copper trace. The DIMM must also transfer additional control, clock, and address information each requiring their own traces. This means that for a DIMM to transfer 64 bits per clock cycle, there must be **well over 100 copper traces between the DIMM slot and the CPU.** We cannot decrease the width of these traces past a certain bound because:
 
-  1) it's difficult to engineer
-  2) as the cross-sectional area of a conductor decreases, the resistance increases which directly decreases voltage measured at the receiver. We would need to "push" the electrons much harder in order for the receiver to see a "1" or "0".
+  1. it's difficult to engineer
+  2. as the cross-sectional area of a conductor decreases, the resistance increases which directly decreases voltage measured at the receiver. We would need to "push" the electrons much harder in order for the receiver to see a "1" or "0".
 
 - The "Power Wall"
 
@@ -39,8 +39,8 @@ The physical design of DIMM has a few limitations which makes it unsuitable for 
   
   Additionally, every physical medium has a property called capacitance, which measures that medium's ability to store electrical charge. In the context of signal integrity, a medium with high capacitance causes two large problems:
 
-  1) it increases the latency of the electrical signal transfer between the sender and receiver
-  2) the voltage at the receiver drains more slowly, putting a hard cap on the frequency that signals can be sent across the medium. If a signal is sent before the previous signal has drained to a sufficient level, the receiver's voltage graph won't clearly disambiguate the end of the previous signal and the start of the current one.
+  1. it increases the latency of the electrical signal transfer between the sender and receiver
+  2. the voltage at the receiver drains more slowly, putting a hard cap on the frequency that signals can be sent across the medium. If a signal is sent before the previous signal has drained to a sufficient level, the receiver's voltage graph won't clearly disambiguate the end of the previous signal and the start of the current one.
 
 The core issue is that DIMMs are designed to move relatively small amounts of data at a high frequency, but due to the laws of physics we cannot continue increasing frequency in order to increase data transfer per second.
 
@@ -50,7 +50,7 @@ There are two primary problems to solve:
 
 1. We need to decrease the physical distance that electrons need to travel.
 
-    A decrease in length of the medium directly dereases the resistance of the medium which decreases the voltage required to push electrons through the medium, reducing the power usage of the overall system.
+    A decrease in the length of the medium directly decreases the resistance of the medium which decreases the voltage required to push electrons through the medium, reducing the power usage of the overall system.
 
 2. We need to increase the amount of data that can be delivered simultaneously.
 
