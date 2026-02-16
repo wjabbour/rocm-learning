@@ -1,10 +1,11 @@
 # Currently Working On
 
-I was excited to begin learning Triton, but AMD's nightly builds of ROCm/Pytorch don't support my GPU architecture just yet. For now, I will delve into quantization. 
-
-I just finished the writeup for my [block-level reduction](src/kernels/reduction/sum_1d/v1_block_level/profiling.md).
-
 [Here](PROGRESSION_LOG.md) is everything I've worked on so far, ordered and dated.
+
+I recently achieved 84.4% Memory Bandwidth Efficiency (~541 GB/s) on my Radeon 9070XT (RDNA 4) using wave shuffles, LDS, and a grid-stride loop. You can see the code and profiling writeup for the kernel [here](src/kernels/reduction/sum_1d/v1_block_level).
+
+My primary current focus is on learning about vLLM and landing some commits in the project which push forward vLLM on RDNA.
+My secondary current focus is on further digging into ROCm and HIP, focusing on vectorization and quantization.
 
 # About Me
 
@@ -32,15 +33,15 @@ A higher-level DSL for writing high-performance kernels, increasingly used in mo
 
 ### GPU Architecture
 
-Wavefronts, SIMDs, LDS, VGPRs, vectorized memory access, latency hiding, and the AMDGCN compiler toolchain.
+Wavefronts, SIMDs, LDS, VGPRs, vectorized memory access, latency hiding, ROCm ISA, wavefront scheduler.
 
 ### Model Serving at Scale
 
-PagedAttention, KV-cache management, continuous batching, speculative decoding, and multi-GPU parallelism.
+vLLM, PagedAttention, KV-cache management, continuous batching, speculative decoding, and multi-GPU parallelism.
 
 ### Profiling & Debugging
 
-rocprof, occupancy analysis, register pressure.
+rocprofv3, PMCs, perfetto, bottleneck analysis (latency vs. memory vs. compute).
 
 # Contact
 
