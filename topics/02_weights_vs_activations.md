@@ -6,7 +6,7 @@ I know a bit about HIP kernels, GPU and CPU microarchitecture, and the (extremel
 
 ## What is a Weight?
 
-Weights are fundamental to the idea of machine learning. Before machine learning, a human needed to write imperative code: "Retrieve data chunk A from memory, add 2, if sum is greater than 10, then...". This works great. We can build trillion dollar global economies on this foundational power that computers have enabled for us.
+Weights are fundamental to the idea of machine learning. Before machine learning, a human needed to write imperative code: "Retrieve data chunk A from memory, add 2, if sum is greater than 10...". This works great. We can build trillion dollar global economies on this foundational power that computers have enabled for us.
 
 But can we write an imperative function which, if given a 1MB array of RGB values corresponding to a photograph, we decide which number (0-9) is represented in that picture? What if the picture is blurry? What if the number is varied slightly, but still recognizable?
 
