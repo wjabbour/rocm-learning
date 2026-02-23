@@ -1,5 +1,19 @@
 # Thoughts
 
+## 2/22/2026
+
+The experiencing self functions as a real-time, lossy encoder. It performs extreme quantization and selective ingestion of external stimuli, collapsing a chaotic environment into a manageable stream of tokens. This process optimizes bandwidth by prioritizing high-weight contextual data over noise.
+
+Memories are not static files; they are **high-dimensional embeddings** within a latent space. 
+* **Recall:** This is a **pattern completion** task. An index (a scent, a timestamp, a face) acts as a query vector. The brain performs a nearest-neighbor search to pull the most relevant cluster of data.
+* **Visualization:** This is the **generative decoding** of that embedding. It is a transformation of the latent vector to reconstruct a sensory output, filling in quantized gaps with probabilistic "hallucination."
+
+### The "Sprouts" Use Case: Vector Mapping
+When walking to the supermarket, the brain does not store a raw data stream. It creates a **context-aware trajectory**:
+1.  **Positional Encoding:** Spatial coordinates (Home $\to$ East $\to$ Sprouts).
+2.  **Attention Mechanism:** High-weight tokens (warm weather, specific street signs) are preserved, while low-weight data (the color of every passing car) is discarded.
+3.  **The Resulting Vector:** The trip is stored as a single point in a high-dimensional manifold, defined by its relationship to other vectors (e.g., "The time I forgot my wallet" or "The morning it rained").
+
 ## 2/13/2026
 
 LLM decoders are auto-regressive: to generate output token N + 1, the model must consider the previous N tokens. This is the exact problem that transormers revolutionized on the training side - transformers enabled parallelizable training pipelines via large matrix multiplications. Can we find some way of parallelizing output generation?
