@@ -30,7 +30,7 @@ When walking to the supermarket, the brain does not store a raw data stream. It 
 
 ## 2/13/2026
 
-LLM decoders are auto-regressive: to generate output token N + 1, the model must consider the previous N tokens. This is the exact problem that transormers revolutionized on the training side - transformers enabled parallelizable training pipelines via large matrix multiplications. Can we find some way of parallelizing output generation?
+LLM decoders are auto-regressive: to generate output token N + 1, the model must consider the previous N tokens. This is the exact problem that transformers revolutionized on the training side - transformers enabled parallelizable training pipelines via large matrix multiplications. Can we find some way of parallelizing output generation?
 
 Once again, we should look to biology to guide the design of our technological system. How do humans think and how do we form sentences? We usually have some abstract ideas in our mind and generate sentences based on those ideas. Can we create idea vectors for answer sentiments, use those answer sentiments and answer-text-segment awareness to parallelize?
 
