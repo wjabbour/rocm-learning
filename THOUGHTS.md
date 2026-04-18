@@ -10,7 +10,9 @@ However, during training, larger data types are used so that a larger range of v
 
 Consider a model trained using BF16 weights (each weight is represented using 16 bits). A 70B parameter model where each weight is BF16 (two bytes) would be 140GB. A GPU would need 140GB of memory to keep the model entirely in memory. However, if we quantize that down to an FP8 representation then our GPU only needs 70GB. 
 
-Then, there is the even more compact MXFP4 data type where each weight is encoded as a floating point using only 4 bits. However, the format uses a configurable per-block scale factor to enrich the weights at compute time so they can be adequately differentiated in the forward passes of the inference pipeline. The result is that 140GB of training weights ends up being 35GB at inference time, something that can fit in the memory of a high-end GPU.
+Then, there is the even more compact MXFP4 data type where each weight is encoded as a floating point using only 4 bits. However, the format uses a configurable per-block scale factor to restore the dynamic range of the weights at compute time so they can be adequately differentiated in the forward passes of the inference pipeline. The result is that 140GB of training weights ends up being 35GB at inference time, something that can fit in the memory of a high-end GPU.
+
+What software systems and data types will exist in the future so that a high-end inference model can be run on a Tamagotchi?
 
 ## 2/22/2026
 
