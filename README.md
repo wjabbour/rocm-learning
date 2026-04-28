@@ -4,7 +4,9 @@
 
 I recently achieved 84.4% Memory Bandwidth Efficiency (~541 GB/s) on my Radeon 9070XT (RDNA 4) using wave shuffles, LDS, and a grid-stride loop. You can see the code and profiling writeup for the kernel [here](src/kernels/reduction/sum_1d/v1_block_level).
 
-My primary focus is contributing to vLLM's ROCm inference stack. Recent work:
+My primary focus is contributing to vLLM's ROCm inference stack. 
+
+Recent work:
 
 **Merged**
 - [vllm#35672](https://github.com/vllm-project/vllm/pull/35672) — Moved a test utility out of core into the test file that uses it, removing dead production code.
