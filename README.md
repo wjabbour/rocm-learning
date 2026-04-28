@@ -9,7 +9,7 @@ My secondary current focus is on further digging into ROCm and HIP, focusing on 
 
 # About Me
 
-Hi, I’m Turner Jabbour. I’ve been a software engineer for ~7 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
+Hi, I'm Turner Jabbour. I've been a software engineer for ~7 years, primarily working in Node and React. Around September 2025, I became deeply interested in GPU programming, ROCm, and the broader world of low-level performance engineering.
 
 This repository is my space to learn in public as I delve into GPU kernel engineering and inference systems work.
 
@@ -19,29 +19,7 @@ There are three important directories:
 - [papers](papers) - I summarize and discuss different papers.
 - [topics](topics) - I dive deep into some specific topic.
 
-My long-term goal is to build strong competency in HIP, Triton, and AMD’s GPU software stack, with a focus on high-performance inference.
-
-# Scheduled Learning
-
-### RCCL
-
-AMD’s collectives library for multi-GPU communication (AllReduce, AllGather, ReduceScatter, etc.) used heavily in distributed inference.
-
-### Triton
-
-A higher-level DSL for writing high-performance kernels, increasingly used in modern inference work (FlashAttention, fused ops, reductions).
-
-### GPU Architecture
-
-Wavefronts, SIMDs, LDS, VGPRs, vectorized memory access, latency hiding, ROCm ISA, wavefront scheduler.
-
-### Model Serving at Scale
-
-vLLM, PagedAttention, KV-cache management, continuous batching, speculative decoding, and multi-GPU parallelism.
-
-### Profiling & Debugging
-
-rocprofv3, PMCs, perfetto, bottleneck analysis (latency vs. memory vs. compute).
+My long-term goal is to build strong competency in HIP, Triton, and AMD's GPU software stack, with a focus on high-performance inference.
 
 # Contact
 
