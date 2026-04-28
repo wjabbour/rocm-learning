@@ -6,8 +6,6 @@ I recently achieved 84.4% Memory Bandwidth Efficiency (~541 GB/s) on my Radeon 9
 
 My primary focus is contributing to vLLM's ROCm inference stack. 
 
-Recent work:
-
 **Merged**
 - [vllm#35672](https://github.com/vllm-project/vllm/pull/35672) — Moved a test utility out of core into the test file that uses it, removing dead production code.
 
