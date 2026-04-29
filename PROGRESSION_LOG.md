@@ -1,3 +1,11 @@
+## 4/29/2026 - fastsafetensors ROCm wheel PR merged
+
+[PR #67](https://github.com/foundation-model-stack/fastsafetensors/pull/67) merged into [foundation-model-stack/fastsafetensors](https://github.com/foundation-model-stack/fastsafetensors).
+
+Removed the `hipify-perl` build dependency — it was only being used to transform `dlsym` string literals like `"cudaMemcpy"` → `"hipMemcpy"`, which the C preprocessor can handle directly. Added `GPU_SYM_*` macros in `cuda_compat.h` and replaced 12 hardcoded string literals in `ext.cpp`. Stripped the custom `hipify_source_files()` build step from `setup.py` entirely.
+
+Net result: ROCm wheels now build in a standard `manylinux` container with no ROCm toolchain required, unblocking proper PyPI publishing for both CUDA and ROCm targets. -258 / +73 lines.
+
 ## 2/7/2025 - Finish HBM topic
 
 [source](topics/01_hbm.md)
