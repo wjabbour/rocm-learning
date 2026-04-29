@@ -13,7 +13,7 @@ My primary focus is contributing to vLLM's ROCm inference stack. My secondary fo
 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#40827](https://github.com/vllm-project/vllm/pull/40827) | Rename `LLMM1` → `vecMatMul`, refactor, fix two RDNA4 bugs | Open |
 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#41187](https://github.com/vllm-project/vllm/pull/41187) | Fix `reduction_smem` layout (stacks on #40827) | Open |
 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#35173](https://github.com/vllm-project/vllm/pull/35173) | Move `TORCH_CHECK` assertions in `wvSplitK` to fire before values are consumed | Open |
-| [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#35672](https://github.com/vllm-project/vllm/pull/35672) | Move test utility to test file, remove dead production code | Merged |
+| [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#35672](https://github.com/vllm-project/vllm/pull/35672) | Identified and removed dead production code — a utility function that was silently unreachable because AIter had taken over its dispatch path | Merged |
 | [foundation-model-stack/fastsafetensors](https://github.com/foundation-model-stack/fastsafetensors) | [#67](https://github.com/foundation-model-stack/fastsafetensors/pull/67) | Remove `hipify-perl` build dependency, enable ROCm `manylinux` wheel builds | Merged |
 
 # About Me
