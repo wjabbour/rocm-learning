@@ -15,6 +15,7 @@ My primary focus is contributing to vLLM's ROCm inference stack. My secondary fo
 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#35173](https://github.com/vllm-project/vllm/pull/35173) | Move `TORCH_CHECK` assertions in `wvSplitK` to fire before values are consumed | Open |
 | [vllm-project/vllm](https://github.com/vllm-project/vllm) | [#35672](https://github.com/vllm-project/vllm/pull/35672) | Identified and removed dead production code — a utility function that was silently unreachable because AIter had taken over its dispatch path | Merged |
 | [foundation-model-stack/fastsafetensors](https://github.com/foundation-model-stack/fastsafetensors) | [#67](https://github.com/foundation-model-stack/fastsafetensors/pull/67) | Remove `hipify-perl` build dependency, enable ROCm `manylinux` wheel builds | Merged |
+| [foundation-model-stack/fastsafetensors](https://github.com/foundation-model-stack/fastsafetensors) | [#78](https://github.com/foundation-model-stack/fastsafetensors/pull/78) | Universal CUDA/ROCm wheel via runtime `dlopen` detection — single build works on both platforms | Open |
 
 # About Me
 
