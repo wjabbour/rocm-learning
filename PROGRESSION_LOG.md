@@ -1,3 +1,9 @@
+## 5/25/2026 - Bump fastsafetensors to v0.3.2 in vLLM
+
+[PR #43625](https://github.com/vllm-project/vllm/pull/43625) opened against [vllm-project/vllm](https://github.com/vllm-project/vllm).
+
+The ROCm requirements in vLLM had been pinning fastsafetensors via a git source build (`git+https://...@<commit>`) because earlier PyPI releases only shipped CUDA wheels. With v0.3.2 (which includes the universal CUDA/ROCm wheel from fastsafetensors #78), the source build is no longer needed. Updated all requirements files and `.in` sources to pull from PyPI. Confirmed weight loading end-to-end on ROCm (RDNA4 locally, gfx942/MI300X in CI context). Weights loaded in 0.14s.
+
 ## 4/29/2026 - fastsafetensors ROCm wheel PR merged
 
 [PR #67](https://github.com/foundation-model-stack/fastsafetensors/pull/67) merged into [foundation-model-stack/fastsafetensors](https://github.com/foundation-model-stack/fastsafetensors).
